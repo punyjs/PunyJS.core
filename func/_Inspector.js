@@ -46,12 +46,15 @@ function _Inspector(
     /**
     * @worker
     */
-    return function FunctionInspector(fn) {
+    return function FunctionInspector(fn, skipFail) {
         ///INPUT VALIDATION
         if (
             typeof fn !== "string"
             && typeof fn !== "function"
         ) {
+            if (!!skipFail) {
+                return;
+            }
             throw new Error(`${errors.invalid_type}`);
         }
         ///END INPUT VALIDATION
@@ -67,6 +70,9 @@ function _Inspector(
         , body = !!match && match[3];
 
         if (!match) {
+            if (!!skipFail) {
+                return;
+            }
             throw new Error(`${errors.invalid_format}`);
         }
 
