@@ -53,6 +53,11 @@ function _Reporter(
     * @private
     */
     , categories = ["info","error","stack"]
+    /**
+    * A regular expression pattern for matchin string replacement charaters
+    * @property
+    */
+    , STR_PATT = /%s/g
     ;
 
     /**
@@ -75,7 +80,7 @@ function _Reporter(
                 }
             }
             //if there are details, let's make sure we aren't going to keep a reference to variables that should be released
-            if (!!details) {
+            if (!!details && typeof details === "object") {
                 try {
                     details = JSON.parse(JSON.stringify(details));
                 }
@@ -83,8 +88,10 @@ function _Reporter(
                     details = cnsts.internalExceptionPrefix + ex;
                 }
             }
+
             //create an array to hold the listener promises
             var procs = []
+            , counter
             , reportMessage = {
                 "category": category
                 , "message": message
@@ -92,7 +99,20 @@ function _Reporter(
             };
 
             if (!!details) {
+                if (!Array.isArray(details)) {
+                    details = [details];
+                }
                 reportMessage.details = details;
+
+                //update the message with the details if %s exists
+                if (STR_PATT.test(message)) {
+                    counter = -1;
+                    reportMessage.message =
+                        message.replace(STR_PATT, function replaceStr() {
+                            counter++;
+                            return details[counter];
+                        });
+                }
             }
 
             listeners.forEach(function forEachHandler(listener) {
@@ -100,11 +120,12 @@ function _Reporter(
                     new Promise(function handlerPromise() {
                         try {
 
-                            if (!listener.categories
-                                || listener.categories.indexOf(category) !== -1)
-                                {
-                                    listener.fn(reportMessage);
-                                }
+                            if (
+                                !listener.categories
+                                || listener.categories.indexOf(category) !== -1
+                            ) {
+                                listener.fn(reportMessage);
+                            }
                         }
                         catch(ex) {
                             //swallow, do we care if an external reporting  handler fails?
