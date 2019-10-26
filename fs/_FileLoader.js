@@ -4,6 +4,7 @@
 */
 function _FileLoader(
     promise
+    , nodePath
     , nodeFs
 ) {
 
@@ -19,7 +20,7 @@ function _FileLoader(
         return new promise(function thenReadFile(resolve, reject) {
             //start the read process
             nodeFs.readFile(
-                path
+                nodePath.resolve(path)
                 , options
                 , function readFileCb(err, data) {
                     try {
