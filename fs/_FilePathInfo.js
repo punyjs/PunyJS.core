@@ -10,10 +10,21 @@ function _FilePathInfo(
     , is_regexp
     , is_array
 ) {
-
+    /**
+    * Default options to use when none are given
+    * @property
+    */
     var defaultOptions = {
         "recurse": false
-    };
+        , "skipDotFiles": true
+        , "skipDotDirectories": true
+    }
+    /**
+    * A reg exp pattern for splitting a path by the seperator
+    * @property
+    */
+    , SEP_PATT = /[\\\/]/
+    ;
 
     /**
     * @worker
@@ -108,10 +119,16 @@ function _FilePathInfo(
     function readDir(dirPath, options, cb) {
         var len
         , results = []
+        , dirName = dirPath.split(SEP_PATT).pop()
         , dir = {
             "path": dirPath
             , "isDirectory": true
         };
+        //if this is a dot directory, see if we're skipping it
+        if (dirName[0] === "." && options.skipDotDirectories) {
+            cb();
+            return;
+        }
 
         //start the dir read
         nodeFs.readdir(
@@ -159,25 +176,38 @@ function _FilePathInfo(
             }
             //if it's not a dir then it's a file so we'll record that
             if (!stat.isDirectory()) {
-                var ext = nodePath.extname(curPath)
+                var ext = nodePath.extname(curPath).substring(1)
+                , name = nodePath.basename(curPath)
                 , file = null;
-                //check the filter
-                if (!!options.filter) {
-                    if (is_regexp(options.filter)) {
-                        if (options.filter.test(ext)) {
-                            file = {
-                                "path": curPath
-                                , "isDirectory": false
-                            };
+                //either not a dot file or we're not skipping dot files
+                if (name[0] !== "." || !options.skipDotFiles) {
+                    //check the filter
+                    if (!!options.filter) {
+                        if (is_regexp(options.filter)) {
+                            if (options.filter.test(name)) {
+                                file = {
+                                    "path": curPath
+                                    , "isDirectory": false
+                                };
+                            }
+                        }
+                        else {
+                            if (options.filter.indexOf(ext) !== -1) {
+                                file = {
+                                    "path": curPath
+                                    , "isDirectory": false
+                                };
+                            }
                         }
                     }
-                    else if (options.filter.indexOf(ext) !== -1) {
+                    else {
                         file = {
                             "path": curPath
                             , "isDirectory": false
                         };
                     }
                 }
+
                 finished(null, file);
             }
             //if it is a dir then run the readDir, but only if recurse is true
@@ -188,7 +218,7 @@ function _FilePathInfo(
                     , finished
                 );
             }
-            //a directory but no recurse so don't pass any args
+            //a directory but no recurse so don't decend
             else {
                 finished();
             }
