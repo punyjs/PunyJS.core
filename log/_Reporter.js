@@ -5,7 +5,7 @@
 *   > The listener execution happens asyncronousy, so it's non-blocking.
 *   > Each listener function is called within it's own asyncronous
 * @factory
-*   @dependency timestamper TruJS.timing._Timestamper
+*   @dependency timestamper [":TruJS.timing._Timestamper",[]]
 * ---
 * @interface iReporterMessage
 *   @property {string} message The reported message
