@@ -1,15 +1,15 @@
 /**
-* A simple function for finding a value in nested objects using a `path` in dot notation
+* A simple function for finding a value in nested objects using a `jpath` in dot notation
 * @function
 */
-function Lookup(path, data) {
+function Lookup(jpath, data) {
     var SPLIT_PATH = /[.]/g
     , INDXR_PATT = /[\[\]]/g
     , NUM_PATT = /^[0-9]+$/
     ;
 
     //convert indexers [indexer] to dots
-    var pathNoIndexers = path.replace(INDXR_PATT, ".")
+    var pathNoIndexers = jpath.replace(INDXR_PATT, ".")
     , pathSplit = pathNoIndexers.split(SPLIT_PATH)
     , scope = data;
 
