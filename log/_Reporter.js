@@ -5,7 +5,8 @@
 *   > The listener execution happens asyncronousy, so it's non-blocking.
 *   > Each listener function is called within it's own asyncronous
 * @factory
-*   @dependency timestamper [":TruJS.timing._Timestamper",[]]
+*   @dependency {function} timestamper [":TruJS.timing._Timestamper",[]]
+*   @dependency {funciton} is.object [":TruJS.is.Object",[]]
 * ---
 * @interface iReporterMessage
 *   @property {string} message The reported message
@@ -18,6 +19,7 @@
 */
 function _Reporter(
     timestamper
+    , is_object
 ) {
     /**
     * Represents the returned worker object object for reference instead of `this`
@@ -59,99 +61,6 @@ function _Reporter(
     */
     , STR_PATT = /%s/g
     ;
-
-    /**
-    * Fires the listeners asyncronously, non-blocking, non-successive
-    * @function
-    *   @param {string} category The category of the reported message
-    *   @param {string} message The message that will be reported
-    *   @param {object} [details] An object with details about the message
-    *   @param {number} timestamp The # of millisencons since origin
-    */
-    function fireListeners(timestamp, category, message, details) {
-        if (listeners.length > 0) {
-            //ensure the message is a string
-            if (typeof message !== "string") {
-                try {
-                    message = JSON.stringify(message);
-                }
-                catch(ex) { //message is useless at this point, re-purpose
-                    message = cnsts.internalExceptionPrefix + ex;
-                }
-            }
-            //if there are details, let's make sure we aren't going to keep a reference to variables that should be released
-            if (!!details && typeof details === "object") {
-                try {
-                    details = JSON.parse(JSON.stringify(details));
-                }
-                catch(ex) {
-                    details = cnsts.internalExceptionPrefix + ex;
-                }
-            }
-
-            //create an array to hold the listener promises
-            var procs = []
-            , counter
-            , reportMessage = {
-                "category": category
-                , "message": message
-                , "timestamp": timestamp
-            };
-
-            if (!!details) {
-                if (!Array.isArray(details)) {
-                    details = [details];
-                }
-                reportMessage.details = details;
-
-                //update the message with the details if %s exists
-                if (STR_PATT.test(message)) {
-                    counter = -1;
-                    reportMessage.message =
-                        message.replace(STR_PATT, function replaceStr() {
-                            counter++;
-                            return details[counter];
-                        });
-                }
-            }
-
-            listeners.forEach(function forEachHandler(listener) {
-                procs.push(
-                    new Promise(function handlerPromise() {
-                        try {
-
-                            if (
-                                !listener.categories
-                                || listener.categories.indexOf(category) !== -1
-                            ) {
-                                listener.fn(reportMessage);
-                            }
-                        }
-                        catch(ex) {
-                            //swallow, do we care if an external reporting  handler fails?
-                        }
-                    })
-                );
-            });
-
-            Promise.all(procs);
-        }
-    }
-    /**
-    * Creates a listener object
-    * @function
-    */
-    function createListener(fn, categories) {
-        if (typeof fn !== "function") {
-            throw new Error(
-                `${errors.invalid_reporter_listener} (${typeof fn})`
-            );
-        }
-        return {
-            "fn": fn
-            , "categories": categories
-        };
-    }
 
     /**
     * @worker
@@ -395,4 +304,97 @@ function _Reporter(
             }
         }
     });
+
+    /**
+    * Fires the listeners asyncronously, non-blocking, non-successive
+    * @function
+    *   @param {string} category The category of the reported message
+    *   @param {string} message The message that will be reported
+    *   @param {object} [details] An object with details about the message
+    *   @param {number} timestamp The # of millisencons since origin
+    */
+    function fireListeners(timestamp, category, message, details) {
+        if (listeners.length > 0) {
+            //ensure the message is a string
+            if (typeof message !== "string") {
+                try {
+                    message = JSON.stringify(message);
+                }
+                catch(ex) { //message is useless at this point, re-purpose
+                    message = cnsts.internalExceptionPrefix + ex;
+                }
+            }
+            //if there are details, let's make sure we aren't going to keep a reference to variables that should be released
+            if (!!details && typeof details === "object") {
+                try {
+                    details = JSON.parse(JSON.stringify(details));
+                }
+                catch(ex) {
+                    details = cnsts.internalExceptionPrefix + ex;
+                }
+            }
+
+            //create an array to hold the listener promises
+            var procs = []
+            , counter
+            , reportMessage = {
+                "category": category
+                , "message": message
+                , "timestamp": timestamp
+            };
+
+            if (!!details) {
+                reportMessage.details = details;
+
+                //update the message with the details if %s exists
+                if (STR_PATT.test(message)) {
+                    counter = -1;
+                    reportMessage.message =
+                        message.replace(STR_PATT, function replaceStr() {
+                            counter++;
+                            if (is_object(details)) {
+                                return details[Object.keys(details)[counter]];
+                            }
+                            return details[counter];
+                        });
+                }
+            }
+
+            listeners.forEach(function forEachHandler(listener) {
+                procs.push(
+                    new Promise(function handlerPromise() {
+                        try {
+
+                            if (
+                                !listener.categories
+                                || listener.categories.indexOf(category) !== -1
+                            ) {
+                                listener.fn(reportMessage);
+                            }
+                        }
+                        catch(ex) {
+                            //swallow, do we care if an external reporting  handler fails?
+                        }
+                    })
+                );
+            });
+
+            Promise.all(procs);
+        }
+    }
+    /**
+    * Creates a listener object
+    * @function
+    */
+    function createListener(fn, categories) {
+        if (typeof fn !== "function") {
+            throw new Error(
+                `${errors.invalid_reporter_listener} (${typeof fn})`
+            );
+        }
+        return {
+            "fn": fn
+            , "categories": categories
+        };
+    }
 }
