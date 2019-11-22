@@ -1,6 +1,6 @@
 /**
 * @factory
-*   @dependency idGenerator [":TruJS.core.data._IdGenerator",[]]
+*   @dependency {function} idGenerator [":TruJS.core.data._IdGenerator",[]]
 */
 function _ProcessDetails(
     idGenerator

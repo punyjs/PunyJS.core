@@ -20,7 +20,7 @@ function _FilePathInfo(
         , "skipDotDirectories": true
     }
     /**
-    * A reg exp pattern for splitting a path by the seperator
+    * A reg exp pattern for splitting a path by the separater
     * @property
     */
     , SEP_PATT = /[\\\/]/
