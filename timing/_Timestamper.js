@@ -2,24 +2,18 @@
 * Returns the precision time elapsed, in milliseconds, since the origin
 * @factory
 *   @singleton
+*   @dependency {function} node_process ["+process"]
+*   @dependency {funciton} browser_performance ["+performance"]
 */
 function _Timestamper(
-    process
-    , performance
-    , origin
+    node_process
+    , browser_performance
 ) {
     /**
-    * Multiplier to convert nanosecond to milliseconds
+    * The
     * @property
-    *   @private
     */
-    var NS_MS = 1e-6
-    /**
-    * Multiplier to convert seconds to milliseconds
-    * @property
-    *   @private
-    */
-    , SEC_MS = 1e-3
+    var origin
     /**
     * A reference to the chosen worker function
     * @property
@@ -30,17 +24,17 @@ function _Timestamper(
 
     //set the function that will be used
     //browser
-    if (!!performance) {
+    if (!!browser_performance) {
+        origin = browser_performance.timeOrigin;
         worker = browserNow;
     }
     //node
-    else if (!!process) {
-        origin = calcNow() - (process.uptime() / SEC_MS);
+    else if (!!node_process) {
+        origin = Date.now();
         worker = nodeNow;
     }
     //fallback
     else {
-        origin = origin || Date.now();
         worker = fallbackNow;
     }
 
@@ -51,32 +45,24 @@ function _Timestamper(
     return worker;
 
     /**
-    * Browser performance now
+    * Returns the number of milliseconds since origin, using the browser performance now and adding the origin.
     * @function
     */
     function browserNow() {
-        return performance.now();
+        return browser_performance.now() + origin;
     }
     /**
-    * Node uptime
+    * Returns the number of milliseconds since origin, using the node process uptime, adding the origin and converting it to miliseconds
     * @function
     */
     function nodeNow() {
-        return calcNow() - origin;
+        return node_process.uptime() * 1e-3 + origin;
     }
     /**
-    * Calculates the total nanoseconds for the returned hrtime array
-    * @function
-    */
-    function calcNow() {
-        var hr = process.hrtime();
-        return hr[0] / SEC_MS + hr[1] * NS_MS;
-    }
-    /**
-    * Fallback, low precision
+    * Fallback, low precision milliseconds since 01/01/1970.
     * @function
     */
     function fallbackNow() {
-        return Date.now() - origin;
+        return Date.now();
     }
 }
