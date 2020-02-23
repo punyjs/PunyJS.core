@@ -1,0 +1,5 @@
+{
+    "invalid_uuid_version": "[Invalid UUID Version] The UUID version must be 1-5"
+    , "invalid_options_argument": "[Invalid Options Argument] The UUID options argument must be either a boolean or an object."
+    , "version_not_implemented": "[Version Not Implemented] The version chosen has not been implemented."
+}
