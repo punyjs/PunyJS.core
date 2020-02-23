@@ -41,6 +41,11 @@ function _Inspector(
     * @property
     */
     , WS_PATT = /(?:^[\r\n \t]+)|(?:[\r\n \t]+$)/
+    /**
+    * A regexp pattern for splitting the parameters string
+    * @property
+    */
+    , PARAM_PATT = /(?:^|[,](?!\\))[\t\r\n\s ]*([A-z_$][A-z0-9_$]+)(?:[\s\r\n\t ]*=[\s\r\n\t ]*([A-z0-9_$"'\{\}\[\]]+))?/g
     ;
 
     /**
@@ -67,7 +72,8 @@ function _Inspector(
         , match = fnText.match(FN_LOOKUP)
         , name = !!match && match[1]
         , params = !!match && match[2]
-        , body = !!match && match[3];
+        , body = !!match && match[3]
+        , defaults = {};
 
         if (!match) {
             if (!!skipFail) {
@@ -85,10 +91,17 @@ function _Inspector(
         }
         else {
             //split the result
-            params = params.split(',');
-            //remove comments
-            params = params.map(function (val) {
-                return val.replace(COM_PATT, "").trim();
+            params = params.matchAll(PARAM_PATT);
+            //convert to array
+            params = Array.from(params);
+            //remove comments and default value
+            params = params.map(function (match) {
+                var paramName = match[1]
+                , paramDefault = match[2];
+                if (paramDefault !== undefined) {
+                    defaults[paramName] = paramDefault;
+                }
+                return paramName.replace(COM_PATT, "").trim();
             });
         }
 
@@ -110,6 +123,10 @@ function _Inspector(
             , "params": {
                 "enumerable": true
                 , "value": params
+            }
+            , "defaults": {
+                "enumerable": true
+                , "value": defaults
             }
             , "body": {
                 "enumerable": true
