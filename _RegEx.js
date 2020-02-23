@@ -2,11 +2,16 @@
 * Helper methods for regex
 * @factory
 */
-function _RegEx() {
+function _RegEx(
+
+) {
 
     var self;
 
-    return self = Object.create(self, {
+    /**
+    * @worker
+    */
+    return self = Object.create(null, {
         /**
         * Returns an array of matches when evaluating `val` with `patt`
         * Each match is an array with the first member being the entire matched text
