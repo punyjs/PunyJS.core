@@ -7,7 +7,7 @@
 *   @property {string} encoding The file data encoding
 */
 function _FileInfo(
-    nodePath
+    node_path
 ) {
 
     /**
@@ -20,11 +20,11 @@ function _FileInfo(
 
         //convert the path to a path object if it's a string
         if (typeof path === "string") {
-            path = nodePath.parse(path);
+            path = node_path.parse(path);
         }
 
         if (!path.ext && !!path.base) {
-            path.ext = nodePath.extname(path.base);
+            path.ext = node_path.extname(path.base);
         }
 
         if (!path.name && !!path.base) {

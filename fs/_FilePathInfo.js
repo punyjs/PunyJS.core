@@ -4,8 +4,8 @@
 */
 function _FilePathInfo(
     promise
-    , nodeFs
-    , nodePath
+    , node_fs
+    , node_path
     , utils_applyIf
     , is_regexp
     , is_array
@@ -131,7 +131,7 @@ function _FilePathInfo(
         }
 
         //start the dir read
-        nodeFs.readdir(
+        node_fs.readdir(
             dirPath
             , readDirCb
         );
@@ -159,7 +159,7 @@ function _FilePathInfo(
         //iterator function to check the file type
         function checkEachFile(file) {
             getStat(
-                nodePath.join(
+                node_path.join(
                     dirPath
                     , file
                 )
@@ -176,8 +176,8 @@ function _FilePathInfo(
             }
             //if it's not a dir then it's a file so we'll record that
             if (!stat.isDirectory()) {
-                var ext = nodePath.extname(curPath).substring(1)
-                , name = nodePath.basename(curPath)
+                var ext = node_path.extname(curPath).substring(1)
+                , name = node_path.basename(curPath)
                 , file = null;
                 //either not a dot file or we're not skipping dot files
                 if (name[0] !== "." || !options.skipDotFiles) {
@@ -249,7 +249,7 @@ function _FilePathInfo(
     * @function
     */
     function getStat(path, cb) {
-        nodeFs.stat(path, function(err, stat) {
+        node_fs.stat(path, function(err, stat) {
             if (!!err) {
                 cb(err, path);
             }

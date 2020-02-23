@@ -4,8 +4,8 @@
 */
 function _FileWriter(
     promise
-    , nodeFs
-    , nodePath
+    , node_fs
+    , node_path
 ) {
     /**
     * @constants
@@ -39,8 +39,8 @@ function _FileWriter(
     */
     function makeDirectory(path, options, resolve, reject) {
         try {
-            nodeFs.mkdir(
-                nodePath.dirname(path)
+            node_fs.mkdir(
+                node_path.dirname(path)
                 , options
                 , function makeDirCb(err) {
                     if (!!err) {
@@ -59,7 +59,7 @@ function _FileWriter(
     */
     function writeFile(path, data, resolve, reject) {
         try {
-            nodeFs.writeFile(
+            node_fs.writeFile(
                 path
                 , data
                 , function writeFileCb(err) {
