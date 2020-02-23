@@ -46,6 +46,12 @@ function Reference(jpath, data) {
             ref.exception = ex;
         }
 
+        if (!ref.found) {
+            ref.value = undefined;
+            ref.parent = undefined;
+            ref.index = undefined;
+        }
+
         return ref;
     }
     /**
@@ -84,6 +90,10 @@ function Reference(jpath, data) {
         //if the parent is an array, let's convert the path segment to a number
         if (Array.isArray(ref.parent) && NUM_PATT.test(pathSegment)) {
             pathSegment = parseInt(pathSegment);
+        }
+
+        if (!(pathSegment in ref.parent)) {
+            return false;
         }
 
         ref.index = pathSegment;
