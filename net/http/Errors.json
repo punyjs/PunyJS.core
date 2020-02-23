@@ -1,0 +1,5 @@
+{
+    "http_timeout": "[HTTP Timeout] The HTTP request ran took too long to complete."
+    , "http_failed": "[HTTP Failed] The HTTP request failed or was rejected."
+    , "http_invalid_response": "[HTTP Invalid Response] The response from the server did not result in the expected response type."
+}
