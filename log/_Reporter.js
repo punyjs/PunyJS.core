@@ -7,6 +7,7 @@
 * @factory
 *   @dependency {function} timestamper [":TruJS.timing._Timestamper",[]]
 *   @dependency {funciton} is.object [":TruJS.is.Object",[]]
+*   @dependency {funciton} is.array [":TruJS.is.Array",[]]
 * ---
 * @interface iReporterMessage
 *   @property {string} message The reported message
@@ -20,6 +21,7 @@
 function _Reporter(
     timestamper
     , is_object
+    , is_array
 ) {
     /**
     * Represents the returned worker object object for reference instead of `this`
@@ -303,6 +305,25 @@ function _Reporter(
                 );
             }
         }
+        /**
+        * A method to report messages with `state` category
+        * @method
+        *   @extends report
+        *   @argument {string} category "state"
+        */
+        , "state": {
+            "enumerable": true
+            , "value": function error(message, details, timestamp) {
+                //generate a timestamp if not provided
+                timestamp = timestamp || timestamper();
+                self.report(
+                    "state"
+                    , message
+                    , details
+                    , timestamp
+                );
+            }
+        }
     });
 
     /**
@@ -341,19 +362,23 @@ function _Reporter(
                 "category": category
                 , "message": message
                 , "timestamp": timestamp
-            };
+            }
+            , detailKeys;
 
             if (!!details) {
                 reportMessage.details = details;
 
+                if (is_object(details)) {
+                    detailKeys = Object.keys(details);
+                }
                 //update the message with the details if %s exists
                 if (STR_PATT.test(message)) {
                     counter = -1;
                     reportMessage.message =
                         message.replace(STR_PATT, function replaceStr() {
                             counter++;
-                            if (is_object(details)) {
-                                return details[Object.keys(details)[counter]];
+                            if (is_array(detailKeys)) {
+                                return details[detailKeys[counter]];
                             }
                             return details[counter];
                         });
@@ -373,7 +398,7 @@ function _Reporter(
                             }
                         }
                         catch(ex) {
-                            //swallow, do we care if an external reporting  handler fails?
+                            //swallow, do we care if an external reporting  handler function throws an error?
                         }
                     })
                 );
