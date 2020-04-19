@@ -3,7 +3,9 @@
 * @function
 *   @param {any} v The value to be checked
 *   @returns {boolean}
+* @naming
+*   @alias is_array
 */
 function isArray(v) {
-    return Object.prototype.toString.call(v) === '[object Array]';
+    return Array.isArray(v);
 }
