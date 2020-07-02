@@ -1,0 +1,9 @@
+{
+    "node": [{
+        "crypto": null
+        , "buffer": null
+    }]
+    , "browser":[{
+        "crypto": ["+window.crypto"]
+    }]
+}

@@ -1,0 +1,9 @@
+{
+    "node": [{
+        "crypto": ["+require('crypto')"]
+        , "buffer": ["+Buffer"]
+    }]
+    , "browser":[{
+        "crypto": null
+    }]
+}

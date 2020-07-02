@@ -1,0 +1,6 @@
+{
+    "promise": ["+Promise"]
+    , "security": [{
+        "crypto": [":PunyJS.core.security._Crypto", []]
+    }]
+}
