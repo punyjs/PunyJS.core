@@ -1,5 +1,5 @@
 /**[@test({ "title": "isProp: create an object and check for properties" })]*/
-function testTruJS19(arrange, act, assert, trujs) {
+function testPunyJS19(arrange, act, assert, punyjs) {
     var obj, is1, is2;
 
     arrange(function () {
@@ -10,8 +10,8 @@ function testTruJS19(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        is1 = trujs.isProp(obj, 'key1');
-        is2 = trujs.isProp(obj, 'key2');
+        is1 = punyjs.isProp(obj, 'key1');
+        is2 = punyjs.isProp(obj, 'key2');
     });
 
     assert(function (test) {

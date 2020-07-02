@@ -1,5 +1,5 @@
 /**[@test({ "title": "getType: create some types and check the return value", "format": "browser" })]*/
-function testTruJS8(arrange, act, assert, customEvent, trujs) {
+function testPunyJS8(arrange, act, assert, customEvent, punyjs) {
     var test1, test2, test3, res1, res2, res3;
 
     arrange(function () {
@@ -9,9 +9,9 @@ function testTruJS8(arrange, act, assert, customEvent, trujs) {
     });
 
     act(function () {
-        res1 = trujs.getType(test1);
-        res2 = trujs.getType(test2);
-        res3 = trujs.getType(test3);
+        res1 = punyjs.getType(test1);
+        res2 = punyjs.getType(test2);
+        res3 = punyjs.getType(test3);
     });
 
     assert(function (test) {

@@ -1,5 +1,5 @@
 /**[@test({ "title": "isFunc: test one event and one non-event" })]*/
-function testTruJS15(arrange, act, assert, trujs) {
+function testPunyJS15(arrange, act, assert, punyjs) {
     var func, nonfunc, isfunc1, isfunc2;
 
     arrange(function () {
@@ -10,8 +10,8 @@ function testTruJS15(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        isfunc1 = trujs.isFunc(func);
-        isfunc2 = trujs.isFunc(nonfunc);
+        isfunc1 = punyjs.isFunc(func);
+        isfunc2 = punyjs.isFunc(nonfunc);
     });
 
     assert(function (test) {

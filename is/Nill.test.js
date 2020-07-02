@@ -1,5 +1,5 @@
 /**[@test({ "title": "isNill: test one undefined, null, and object" })]*/
-function testTruJS16(arrange, act, assert, trujs) {
+function testPunyJS16(arrange, act, assert, punyjs) {
     var t1, t2, t3, isn1, isn2, isn3;
 
     arrange(function () {
@@ -12,9 +12,9 @@ function testTruJS16(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        isn1 = trujs.isNill(t1);
-        isn2 = trujs.isNill(t2);
-        isn3 = trujs.isNill(t3);
+        isn1 = punyjs.isNill(t1);
+        isn2 = punyjs.isNill(t2);
+        isn3 = punyjs.isNill(t3);
     });
 
     assert(function (test) {

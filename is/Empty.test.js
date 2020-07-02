@@ -1,5 +1,5 @@
 /**[@test({ "title": "isEmpty: an empty string, array, and object, and then a non-empty version of each" })]*/
-function testTruJS10(arrange, act, assert, trujs) {
+function testPunyJS10(arrange, act, assert, punyjs) {
     //shared variables
     var ar, str, obj, isar, isstr, isobj;
 
@@ -13,9 +13,9 @@ function testTruJS10(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        isar = trujs.isEmpty(ar);
-        isstr = trujs.isEmpty(str);
-        isobj = trujs.isEmpty(obj);
+        isar = punyjs.isEmpty(ar);
+        isstr = punyjs.isEmpty(str);
+        isobj = punyjs.isEmpty(obj);
     });
 
     assert(function (test) {
@@ -26,7 +26,7 @@ function testTruJS10(arrange, act, assert, trujs) {
 }
 
 /**[@test({ "title": "isEmpty: a non empty string, array, and object" })]*/
-function testTruJS11(arrange, act, assert, trujs) {
+function testPunyJS11(arrange, act, assert, punyjs) {
     //shared variables
     var ar, str, obj, isar, isstr, isobj;
 
@@ -42,9 +42,9 @@ function testTruJS11(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        isar = trujs.isEmpty(ar);
-        isstr = trujs.isEmpty(str);
-        isobj = trujs.isEmpty(obj);
+        isar = punyjs.isEmpty(ar);
+        isstr = punyjs.isEmpty(str);
+        isobj = punyjs.isEmpty(obj);
     });
 
     assert(function (test) {

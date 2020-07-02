@@ -1,5 +1,5 @@
 /**[@test({ "title": "applyIf: no defaults, no removing nulls" })]*/
-function testTruJS5(arrange, act, assert, trujs) {
+function testPunyJS5(arrange, act, assert, punyjs) {
     //shared variables
     var obj1, obj2, obj3;
 
@@ -10,7 +10,7 @@ function testTruJS5(arrange, act, assert, trujs) {
 
     act(function () {
         //run the apply with removing nulls
-        obj3 = trujs.applyIf(obj1, obj2, null, false);
+        obj3 = punyjs.applyIf(obj1, obj2, null, false);
     });
 
     assert(function (test) {

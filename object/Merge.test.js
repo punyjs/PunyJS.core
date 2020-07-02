@@ -1,5 +1,5 @@
 /**[@test({ "title": "merge: " })]*/
-function testTruJS21(arrange, act, assert, trujs) {
+function testPunyJS21(arrange, act, assert, punyjs) {
     var obj1, obj2, merged;
 
     arrange(function () {
@@ -20,7 +20,7 @@ function testTruJS21(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        merged = trujs.merge(obj1, obj2);
+        merged = punyjs.merge(obj1, obj2);
     });
 
     assert(function (test) {

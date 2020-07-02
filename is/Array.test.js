@@ -1,5 +1,5 @@
 /**[@test({ "title": "isArray: test one array and one non-array" })]*/
-function testTruJS9(arrange, act, assert, trujs) {
+function testPunyJS9(arrange, act, assert, punyjs) {
     //shared variables
     var ar, nonar, isar1, isar2;
 
@@ -11,8 +11,8 @@ function testTruJS9(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        isar1 = trujs.isArray(ar);
-        isar2 = trujs.isArray(nonar);
+        isar1 = punyjs.isArray(ar);
+        isar2 = punyjs.isArray(nonar);
     });
 
     assert(function (test) {

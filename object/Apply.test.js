@@ -1,5 +1,5 @@
 /**[@test({ "title": "apply: no defaults, not removing nulls" })]*/
-function testTruJS2(arrange, act, assert, trujs) {
+function testPunyJS2(arrange, act, assert, punyjs) {
     //shared variables
     var obj1, obj2, obj3;
 
@@ -10,7 +10,7 @@ function testTruJS2(arrange, act, assert, trujs) {
 
     act(function () {
         //run the apply w/ no defaults
-        obj3 = trujs.apply(obj1, obj2, null, false);
+        obj3 = punyjs.apply(obj1, obj2, null, false);
     });
 
     assert(function (test) {
@@ -21,7 +21,7 @@ function testTruJS2(arrange, act, assert, trujs) {
     });
 }
 /**[@test({ "title": "apply: with defaults, not removing nulls" })]*/
-function testTruJS3(arrange, act, assert, trujs) {
+function testPunyJS3(arrange, act, assert, punyjs) {
     //shared variables
     var obj1, obj2, defaults, obj3;
 
@@ -33,7 +33,7 @@ function testTruJS3(arrange, act, assert, trujs) {
 
     act(function () {
         //run the apply with defaults
-        obj3 = trujs.apply(obj1, obj2, defaults, false);
+        obj3 = punyjs.apply(obj1, obj2, defaults, false);
     });
 
     assert(function (test) {
@@ -47,7 +47,7 @@ function testTruJS3(arrange, act, assert, trujs) {
     });
 }
 /**[@test({ "title": "apply: no defaults, removing nulls" })]*/
-function testTruJS4(arrange, act, assert, trujs) {
+function testPunyJS4(arrange, act, assert, punyjs) {
     //shared variables
     var obj1, obj2, obj3;
 
@@ -58,7 +58,7 @@ function testTruJS4(arrange, act, assert, trujs) {
 
     act(function () {
         //run the apply with removing nulls
-        obj3 = trujs.apply(obj1, obj2, null, true);
+        obj3 = punyjs.apply(obj1, obj2, null, true);
     });
 
     assert(function (test) {

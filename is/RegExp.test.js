@@ -1,5 +1,5 @@
 /**[@test({ "title": "isRegEx: test one regex and one non-regex" })]*/
-function testTruJS17(arrange, act, assert, trujs) {
+function testPunyJS17(arrange, act, assert, punyjs) {
     var regex, noregex, regexRes, noregexRes;
 
     arrange(function () {
@@ -10,8 +10,8 @@ function testTruJS17(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        regexRes = trujs.isRegEx(regex);
-        noregexRes = trujs.isRegEx(noregex);
+        regexRes = punyjs.isRegEx(regex);
+        noregexRes = punyjs.isRegEx(noregex);
     });
 
     assert(function (test) {

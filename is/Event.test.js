@@ -1,5 +1,5 @@
 /**[@test({ "title": "isEvent: test one event and one non-event", "format": "browser" })]*/
-function testTruJS13(arrange, act, assert, customEvent, trujs) {
+function testPunyJS13(arrange, act, assert, customEvent, punyjs) {
     //shared variables
     var evnt, nonevnt, isevnt1, isevnt2;
 
@@ -11,8 +11,8 @@ function testTruJS13(arrange, act, assert, customEvent, trujs) {
     });
 
     act(function () {
-        isevnt1 = trujs.isEvent(evnt);
-        isevnt2 = trujs.isEvent(nonevnt);
+        isevnt1 = punyjs.isEvent(evnt);
+        isevnt2 = punyjs.isEvent(nonevnt);
     });
 
     assert(function (test) {

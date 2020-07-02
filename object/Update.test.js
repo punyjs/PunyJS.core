@@ -1,5 +1,5 @@
 /**[@test({ "title": "update: " })]*/
-function testTruJS22(arrange, act, assert, trujs) {
+function testPunyJS22(arrange, act, assert, punyjs) {
     var obj1, obj2, updated;
 
     arrange(function () {
@@ -20,7 +20,7 @@ function testTruJS22(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        updated = trujs.update(obj1, obj2);
+        updated = punyjs.update(obj1, obj2);
     });
 
     assert(function (test) {

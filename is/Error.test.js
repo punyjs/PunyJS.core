@@ -1,5 +1,5 @@
 /**[@test({ "title": "isError: test one error and one non-error" })]*/
-function testTruJS14(arrange, act, assert, trujs) {
+function testPunyJS14(arrange, act, assert, punyjs) {
     var err, noerr, errRes, noerrRes;
 
     arrange(function () {
@@ -10,8 +10,8 @@ function testTruJS14(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        errRes = trujs.isError(err);
-        noerrRes = trujs.isError(noerr);
+        errRes = punyjs.isError(err);
+        noerrRes = punyjs.isError(noerr);
     });
 
     assert(function (test) {

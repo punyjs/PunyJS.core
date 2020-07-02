@@ -1,5 +1,5 @@
 /**[@test({ "title": "isElement: test one element and one non-element", "format": "browser" })]*/
-function testTruJS12(arrange, act, assert, document, trujs) {
+function testPunyJS12(arrange, act, assert, document, punyjs) {
     //shared variables
     var el, nonel, isel1, isel2;
 
@@ -11,8 +11,8 @@ function testTruJS12(arrange, act, assert, document, trujs) {
     });
 
     act(function () {
-        isel1 = trujs.isElement(el);
-        isel2 = trujs.isElement(nonel);
+        isel1 = punyjs.isElement(el);
+        isel2 = punyjs.isElement(nonel);
     });
 
     assert(function (test) {

@@ -1,5 +1,5 @@
 /**[@test({ "title": "isArguments: test one Arguments and one non-Arguments" })]*/
-function testTruJS18(arrange, act, assert, trujs_core) {
+function testPunyJS18(arrange, act, assert, punyjs_core) {
     var args, noargs, argsRes, noArgsRes;
 
     arrange(function () {
@@ -10,8 +10,8 @@ function testTruJS18(arrange, act, assert, trujs_core) {
     });
 
     act(function () {
-        argsRes = trujs.isArguments(args);
-        noArgsRes = trujs.isArguments(noargs);
+        argsRes = punyjs.isArguments(args);
+        noArgsRes = punyjs.isArguments(noargs);
     });
 
     assert(function (test) {

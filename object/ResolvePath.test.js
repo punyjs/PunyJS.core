@@ -1,5 +1,5 @@
-/**[@test({ "title": "TruJS.resolvePath: resolve various path types" })]*/
-function testTruJS1(arrange, act, assert, trujs) {
+/**[@test({ "title": "PunyJS.resolvePath: resolve various path types" })]*/
+function testPunyJS1(arrange, act, assert, punyjs) {
     var obj, path1, res1, path2, res2, path3, res3;
 
     arrange(function () {
@@ -19,9 +19,9 @@ function testTruJS1(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        res1 = trujs.resolvePath(path1, obj);
-        res2 = trujs.resolvePath(path2, obj);
-        res3 = trujs.resolvePath(path3, obj);
+        res1 = punyjs.resolvePath(path1, obj);
+        res2 = punyjs.resolvePath(path2, obj);
+        res3 = punyjs.resolvePath(path3, obj);
     });
 
     assert(function (test) {
@@ -31,7 +31,7 @@ function testTruJS1(arrange, act, assert, trujs) {
     });
 }
 /**[@test({ "title": "resolvePath" })]*/
-function testTruJS23(arrange, act, assert, trujs) {
+function testPunyJS23(arrange, act, assert, punyjs) {
     var obj, res;
 
     arrange(function () {
@@ -48,7 +48,7 @@ function testTruJS23(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        res = trujs.resolvePath("level1.level2[level1.key].value", obj);
+        res = punyjs.resolvePath("level1.level2[level1.key].value", obj);
     });
 
     assert(function (test) {

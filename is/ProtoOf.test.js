@@ -1,5 +1,5 @@
 /**[@test({ "title": "isPrototypeKey: create a prototype chain and test keys" })]*/
-function testTruJS20(arrange, act, assert, trujs) {
+function testPunyJS20(arrange, act, assert, punyjs) {
     var base, obj, is1, is2;
 
     arrange(function () {
@@ -14,8 +14,8 @@ function testTruJS20(arrange, act, assert, trujs) {
     });
 
     act(function () {
-        is1 = trujs.isPrototypeKey(obj, 'base');
-        is2 = trujs.isPrototypeKey(obj, 'obj');
+        is1 = punyjs.isPrototypeKey(obj, 'base');
+        is2 = punyjs.isPrototypeKey(obj, 'obj');
     });
 
     assert(function (test) {
