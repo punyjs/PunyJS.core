@@ -1,0 +1,4 @@
+{
+    "decode": [":PunyJS.core.encoding._Decode",[]]
+    , "encode": [":PunyJS.core.encoding._Encode",[]]
+}

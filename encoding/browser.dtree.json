@@ -1,0 +1,9 @@
+{
+    "browser": [{
+        "btoa": ["+btoa"]
+        , "atob": ["+atob"]
+    }]
+    , "node": [{
+        "buffer": null
+    }]
+}
