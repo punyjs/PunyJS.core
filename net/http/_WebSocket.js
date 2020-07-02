@@ -16,7 +16,6 @@ function _WebSocket(
     , utils_applyIf
     , is_object
     , is_string
-    , is_buffer
     , encode
     , decode
     , reporter

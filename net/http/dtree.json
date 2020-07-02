@@ -24,8 +24,7 @@
     , "is": [{
         "string": [":PunyJS.core.is.String"]
         , "object": [":PunyJS.core.is.Object"]
-        , "buffer": [":PunyJS.core.is.Buffer"]
-        , "is_func": [":PunyJS.core.is.Func"]
+        , "func": [":PunyJS.core.is.Func"]
     }]
     , "encode": [":PunyJS.core.encoding._Encode",[]]
     , "decode": [":PunyJS.core.encoding._Decode",[]]
