@@ -1,0 +1,18 @@
+{
+    "0": "continuation"
+    , "1": "text"
+    , "2": "binary"
+    , "3": "reserved"
+    , "4": "reserved"
+    , "5": "reserved"
+    , "6": "reserved"
+    , "7": "reserved"
+    , "8": "close"
+    , "9": "ping"
+    , "a": "pong"
+    , "b": "reserved"
+    , "c": "reserved"
+    , "d": "reserved"
+    , "e": "reserved"
+    , "f": "reserved"
+}

@@ -1,0 +1,14 @@
+{
+    "browser":[{
+        "webSocket": null
+        , "crypto": null
+        , "performance": null
+    }]
+    , "node": [{
+        "process": ["+require('process')"]
+        , "tls": ["+require('tls')"]
+        , "net": ["+require('net')"]
+        , "crypto": ["+require('crypto')"]
+        , "buffer": ["+Buffer"]
+    }]
+}

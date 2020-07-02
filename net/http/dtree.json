@@ -1,0 +1,42 @@
+{
+    "defaults": [
+        ":PunyJS.core.net.http.Defaults"
+        , {"conflictResolution": "error"}
+    ]
+    , "errors": [
+        ":PunyJS.core.net.http.Errors"
+        , ":PunyJS.core.data.Errors"
+        , {"conflictResolution": "error"}
+    ]
+    , "info": [
+        ":PunyJS.core.net.http.Info"
+        , {"conflictResolution": "error"}
+    ]
+    , "constants": [
+        ":PunyJS.core.net.http.Constants"
+        , {"conflictResolution": "error"}
+    ]
+    , "url": ["+URL"]
+    , "utils": [{
+        "applyIf": [":PunyJS.core.object.ApplyIf"]
+        , "guid": [":PunyJS.core.data._Uuid",[]]
+    }]
+    , "is": [{
+        "string": [":PunyJS.core.is.String"]
+        , "object": [":PunyJS.core.is.Object"]
+        , "buffer": [":PunyJS.core.is.Buffer"]
+        , "is_func": [":PunyJS.core.is.Func"]
+    }]
+    , "encode": [":PunyJS.core.encoding._Encode",[]]
+    , "decode": [":PunyJS.core.encoding._Decode",[]]
+    , "net": [{
+        "http": [{
+            "httpMessage": [":PunyJS.core.net.http._HttpMessage",[]]
+            , "webSocket": [":PunyJS.core.net.http._WebSocket",[]]
+            , "webSocketEventEmitter": [":PunyJS.core.event._EventEmitter",[]]
+            , "statusCodes": [":PunyJS.core.net.http.StatusCodes"]
+            , "readyStates": [":PunyJS.core.net.http.ReadyStates"]
+            , "frameOpcodes": [":PunyJS.core.net.http.FrameOpcodes"]
+        }]
+    }]
+}
