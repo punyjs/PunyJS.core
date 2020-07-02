@@ -1,9 +1,9 @@
-/**[@test({ "title": "TruJS.func.Inspector: create a function and inspect it" })]*/
+/**[@test({ "title": "PunyJS.func.Inspector: create a function and inspect it" })]*/
 function testInspector1(arrange, act, assert, module) {
     var fnInspector, func1, func2, func3, insp1, insp2, insp3;
 
     arrange(function arrangeFunc() {
-        fnInspector = module(['TruJS.func._Inspector', []]);
+        fnInspector = module(['PunyJS.func._Inspector', []]);
         func1 = function func1(arg1) {
             //some fake stuff
             if (arg1 === '') {
@@ -45,12 +45,12 @@ function testInspector1(arrange, act, assert, module) {
         test('The func3 third param should be "arg3"').value(insp3, 'params[2]').equals('arg3');
     });
 }
-/**[@test({ "title": "TruJS.func.Inspector: getBody" })]*/
+/**[@test({ "title": "PunyJS.func.Inspector: getBody" })]*/
 function testInspector2(arrange, act, assert, module) {
   var fnInspector, func1, insp1, func2, insp2, body1, body2;
 
   arrange(function arrangeFunc() {
-    fnInspector = module(['TruJS.func._Inspector', []]);
+    fnInspector = module(['PunyJS.func._Inspector', []]);
     func1 = function test(var1, var2) {
       var a = {}
       ;
@@ -78,12 +78,12 @@ function testInspector2(arrange, act, assert, module) {
       .equals("var b='1234 { }';");
   });
 }
-/**[@test({ "title": "TruJS.func.Inspector: regression, no space between ) and {" })]*/
+/**[@test({ "title": "PunyJS.func.Inspector: regression, no space between ) and {" })]*/
 function testInspector3(arrange, act, assert, module) {
     var fnInspector, func, insp;
 
     arrange(function arrangeFunc() {
-        fnInspector = module(['TruJS.func._Inspector', []]);
+        fnInspector = module(['PunyJS.func._Inspector', []]);
         func = 'function (var1){\nconsole.log("test"); \n}';
     });
 
@@ -96,12 +96,12 @@ function testInspector3(arrange, act, assert, module) {
         test('The func first param should be "var1"').value(insp, 'params[0]').equals('var1');
     });
 }
-/**[@test({ "title": "TruJS.func.Inspector: regression, \/**\/ in params" })]*/
+/**[@test({ "title": "PunyJS.func.Inspector: regression, \/**\/ in params" })]*/
 function testInspector4(arrange, act, assert, module) {
     var fnInspector, func, insp;
 
     arrange(function arrangeFunc() {
-        fnInspector = module(['TruJS.func._Inspector', []]);
+        fnInspector = module(['PunyJS.func._Inspector', []]);
         func = 'function (var1\n/**/){\nconsole.log("test"); \n}';
     });
 

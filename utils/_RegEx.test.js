@@ -1,9 +1,9 @@
-/**[@test({ "title": "TruJS.RegEx: unit test" })]*/
+/**[@test({ "title": "PunyJS.RegEx: unit test" })]*/
 function testRegEx1(arrange, act, assert, module) {
     var getMatches, patt, test, res;
 
     arrange(function () {
-      getMatches = module(["TruJS._RegEx", []]).getMatches;
+      getMatches = module(["PunyJS._RegEx", []]).getMatches;
 
       patt = /<([^\/\s>]+)([^\/>]+)?[\/]?>/g;
       test = '<input data-point value ="{:input:}" class="input:1234px;"/><div></div><span class=\'test\'></span>';

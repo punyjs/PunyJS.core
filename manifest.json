@@ -1,5 +1,5 @@
 {
-    "name": "TruJS.core"
+    "name": "PunyJS.core"
     , "description": "A library of base root scoped functions and several helper"
 
     , "entries": [

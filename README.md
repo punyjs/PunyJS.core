@@ -1,2 +1,2 @@
-# TruJS.core
-This repository contains the core TruJS components
+# PunyJS.core
+This repository contains the core PunyJS components
