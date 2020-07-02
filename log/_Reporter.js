@@ -306,6 +306,25 @@ function _Reporter(
             }
         }
         /**
+        * A method to report messages with an `tcp` category
+        * @method
+        *   @extends report
+        *   @argument {string} category "tcp"
+        */
+        , "tcp": {
+            "enumerable": true
+            , "value": function error(message, details, timestamp) {
+                //generate a timestamp if not provided
+                timestamp = timestamp || timestamper();
+                self.report(
+                    "tcp"
+                    , message
+                    , details
+                    , timestamp
+                );
+            }
+        }
+        /**
         * A method to report messages with `state` category
         * @method
         *   @extends report
