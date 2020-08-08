@@ -11,7 +11,7 @@ function isEmpty(v) {
     else if (Array.isArray(v) || typeof v === "string") {
         return v.length === 0;
     }
-    else if (typeof v === "object") {
+    else if (!!v && typeof v === "object") {
         for (var key in v) {
             return false;
         }

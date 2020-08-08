@@ -8,7 +8,7 @@ function isObjectValue(v) {
     if (!v) {
         return false;
     }
-    if (typeof v === "object") {
+    if (!!v && typeof v === "object") {
         return true;
     }
     return false;

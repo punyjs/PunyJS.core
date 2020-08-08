@@ -12,7 +12,12 @@ function update(o1, o2) {
     Object.keys(o1)
     .forEach(function forEachKey(key) {
         if (o2.hasOwnProperty(key)) {
-            if (typeof o1[key] === "object" && typeof o2[key] === "object") {
+            if (
+                !!o1[key]
+                && typeof o1[key] === "object"
+                && o2[key]
+                && typeof o2[key] === "object"
+            ) {
                 update(o1[key], o2[key]);
                 return;
             }

@@ -83,7 +83,7 @@ function resolvePath(path, scope) {
             parent = scope;
             index = val;
 
-            if (typeof scope === "object") {
+            if (!!scope && typeof scope === "object") {
                 if (val in scope) {
                     scope = scope[val];
                     return true;

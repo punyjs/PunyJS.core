@@ -5,5 +5,5 @@
 *   @returns {boolean}
 */
 function isIterable(v) {
-    return typeof v === "object" && typeof v.next === "function";
+    return !!v && typeof v === "object" && typeof v.next === "function";
 }

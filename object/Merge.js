@@ -26,7 +26,12 @@ function merge(o1, o2) {
                 o3[key] = o1[key].concat(o2[key]);
                 return;
             }
-            if (typeof o1[key] === "object" && typeof o2[key] === "object") {
+            if (
+                !!o1[key]
+                && typeof o1[key] === "object"
+                && !!o2[key]
+                && typeof o2[key] === "object"
+            ) {
                 o3[key] = merge(o1[key], o2[key]);
                 return;
             }

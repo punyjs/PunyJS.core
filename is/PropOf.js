@@ -6,5 +6,5 @@
 *   @returns {boolean}
 */
 function isPropOf(o, k) {
-    return typeof o === "object" && o.hasOwnProperty(k) || false;
+    return !!o && typeof o === "object" && o.hasOwnProperty(k) || false;
 }
