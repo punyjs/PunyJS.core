@@ -6,78 +6,74 @@ function _EventEmitter(
     , is_object
     , is_func
     , is_nill
+    , is_array
 ) {
-    /**
-    * @property
-    * @private
-    */
-    var listeners = {}
-    /**
-    * @property
-    * @private
-    */
-    , errors = []
+
     /**
     * @constants
     */
-    , cnsts = {
+    var cnsts = {
         "maxErrorLength": 100
     }
     ;
 
+    return EventEmitter;
+
     /**
     * @worker
-    * @prototype
     */
-    return Object.create(null, {
-        "on": {
-            "enumerable": true
-            , "value": function on(eventName, callback, options) {
-                addListener(
-                    eventName
-                    , callback
-                    , options
-                );
-            }
+    function EventEmitter(listeners = {}, errors = []) {
+        if (!is_object(listeners)) {
+            listeners = {};
         }
-        , "once": {
-            "enumerable": true
-            , "value": function once(eventName, callback, options) {
-                if (!is_object(options)) {
-                    options = {};
-                }
-                options.once = true;
-                addListener(
-                    eventName
-                    , callback
-                    , options
-                );
-            }
+        if (!is_array(errors)) {
+            errors = [];
         }
-        , "off": {
-            "enumerable": true
-            , "value": function off(eventName, callback) {
-                removeListener(
-                    eventName
-                    , callback
-                );
+        /**
+        * @prototype
+        */
+        return Object.create(null, {
+            "on": {
+                "enumerable": true
+                , "value": addListener.bind(null, listeners)
             }
-        }
-        , "emit": {
-            "enumerable": true
-            , "value": function emit(eventName, details) {
-                fireEvent(
-                    eventName
-                    , details
-                );
+            , "once": {
+                "enumerable": true
+                , "value": once.bind(null, listeners)
             }
-        }
-    });
-
+            , "off": {
+                "enumerable": true
+                , "value": removeListener.bind(null, listeners)
+            }
+            , "emit": {
+                "enumerable": true
+                , "value": fireEvent.bind(null, listeners)
+            }
+            , "errors": {
+                "enumerable": true
+                , "value": errors
+            }
+        });
+    }
     /**
     * @function
     */
-    function addListener(eventName, callback, options) {
+    function once(listeners, eventName, callback, options) {
+        if (!is_object(options)) {
+            options = {};
+        }
+        options.once = true;
+        addListener(
+            listeners
+            , eventName
+            , callback
+            , options
+        );
+    }
+    /**
+    * @function
+    */
+    function addListener(listeners, eventName, callback, options) {
         if (!listeners.hasOwnProperty(eventName)) {
             listeners[eventName] = [];
         }
@@ -91,8 +87,9 @@ function _EventEmitter(
     /**
     * @function
     */
-    function removeListener(eventName, callback) {
+    function removeListener(listeners, eventName, callback) {
         if (!eventName) {
+            ///TODO: clear the listeners rather than using a new object, we need to keep the reference
             listeners = {};
             return true;
         }
@@ -132,7 +129,7 @@ function _EventEmitter(
     /**
     * @function
     */
-    function fireEvent(eventName, details) {
+    function fireEvent(listeners, eventName, details) {
         var eventListeners = listeners[eventName]
         , runOnceIndexes = []
         ;
@@ -156,7 +153,14 @@ function _EventEmitter(
     * @function
     */
     function executeCallback(runOnceIndexes, details, listener, index) {
-        if (details.runAsync === true) {
+        var options = listener.options
+        , runAsync = details.runAsync === true
+            ? true
+            : !!options
+                && listener.options.runAsync
+                || false
+        ;
+        if (runAsync) {
             executeCallbackAsyncronous(
                 listener
                 , details
@@ -169,7 +173,7 @@ function _EventEmitter(
             );
         }
         //remove the listener for run once
-        if (listener.options.once === true) {
+        if (!!options && options.once === true) {
             runOnceIndexes.push(index);
         }
     }
@@ -215,7 +219,7 @@ function _EventEmitter(
             );
         }
         else {
-            listener.callback();
+            listener.callback(details);
         }
     }
     /**
