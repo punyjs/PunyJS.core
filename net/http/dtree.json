@@ -26,13 +26,13 @@
         , "object": [":PunyJS.core.is.Object"]
         , "func": [":PunyJS.core.is.Func"]
     }]
+    , "eventEmitter": [":PunyJS.core.event._EventEmitter",[]]
     , "encode": [":PunyJS.core.encoding._Encode",[]]
     , "decode": [":PunyJS.core.encoding._Decode",[]]
     , "net": [{
         "http": [{
             "httpMessage": [":PunyJS.core.net.http._HttpMessage",[]]
             , "webSocket": [":PunyJS.core.net.http._WebSocket",[]]
-            , "webSocketEventEmitter": [":PunyJS.core.event._EventEmitter",[]]
             , "statusCodes": [":PunyJS.core.net.http.StatusCodes"]
             , "readyStates": [":PunyJS.core.net.http.ReadyStates"]
             , "frameOpcodes": [":PunyJS.core.net.http.FrameOpcodes"]
