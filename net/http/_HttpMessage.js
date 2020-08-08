@@ -174,6 +174,9 @@ function _HttpMessage(
         var headers = {};
 
         headerLines.forEach(function forEachHeaderLine(headerLine) {
+            if (!headerLine) {
+                return;
+            }
             var keyVal = headerLine.split(":")
             , key = keyVal[0].toLowerCase()
             , val = keyVal[1]
