@@ -1,8 +1,15 @@
 {
-    "socket_server_closing": "The server has stopped listening."
-    , "socket_server_closing_clients": "The server is closing all of the client connections."
-    , "socket_client_closing": "The client socket is closing."
-    , "socket_client_opening": "The client socket is opening."
-    , "socket_message_received": "The socket has received a message."
-    , "socket_frame_received": "The socekt has received a frame with fin false."
+    "core": {
+        "net": {
+            "http": {
+                "socket_server_closing": "The server has stopped listening."
+                , "socket_server_closing_clients": "The server is closing all of the client connections."
+                , "socket_client_closing": "The client socket is closing."
+                , "socket_client_opening": "The client socket is opening."
+                , "socket_message_received": "The socket has received a message."
+                , "socket_message_sent": "The socket has sent a message."
+                , "socket_frame_received": "The socekt has received a frame with fin false."
+            }
+        }
+    }
 }

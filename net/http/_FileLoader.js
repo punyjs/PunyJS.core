@@ -101,7 +101,7 @@ function _FileLoader(
             //anything other than 200 is an error
             if (request.status !== 200) {
                 reject(
-                    new Error(`${errors.http_invalid_response} (${request.status}: ${request.statusText} -> ${request.responseType})`)
+                    new Error(`${errors.core.net.http.http_invalid_response} (${request.status}: ${request.statusText} -> ${request.responseType})`)
                 );
                 return;
             }
@@ -115,7 +115,7 @@ function _FileLoader(
     function addTimeoutListener(request, reject) {
         request.addEventListener("timeout", function handleLoadEnd() {
             reject(
-                new Error(`${errors.http_timeout}`)
+                new Error(`${errors.core.net.http.http_timeout}`)
             );
         });
     }
@@ -125,7 +125,7 @@ function _FileLoader(
     function addErrorListener(request, reject) {
         request.addEventListener("error", function handleError() {
             reject(
-                new Error(`${errors.http_failed}`)
+                new Error(`${errors.core.net.http.http_failed}`)
             );
         });
     }

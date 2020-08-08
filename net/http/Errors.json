@@ -1,8 +1,15 @@
 {
-    "http_timeout": "[HTTP Timeout] The HTTP request ran took too long to complete."
-    , "http_failed": "[HTTP Failed] The HTTP request failed or was rejected."
-    , "http_invalid_response": "[HTTP Invalid Response] The response from the server did not result in the expected response type."
-    , "invalid_socket_type": "[Invalid Socket Type] Unable to determine the socket type (client / server) or the engine (node / browser)."
-    , "generic_socket_error": "[Generic Socket Error] There was an error with the web socket connection."
-    , "invalid_websocket_request": "[Invalid WebSocket Request] The web socket request did not meet the requirements."
+    "core": {
+        "net": {
+            "http": {
+                "http_timeout": "[HTTP Timeout] The HTTP request ran took too long to complete."
+                , "http_failed": "[HTTP Failed] The HTTP request failed or was rejected."
+                , "http_invalid_response": "[HTTP Invalid Response] The response from the server did not result in the expected response type."
+                , "invalid_socket_type": "[Invalid Socket Type] Unable to determine the socket type (client / server) or the engine (node / browser)."
+                , "generic_socket_error": "[Generic Socket Error] There was an error with the web socket connection."
+                , "invalid_websocket_request": "[Invalid WebSocket Request] The web socket request did not meet the requirements."
+                , "payload_exceeds_max_size": "[Payload Exceeds Max Size] The payload length exceeds the maximum size for a single socket frame; ensure fragmentation has been configured."
+            }
+        }
+    }
 }

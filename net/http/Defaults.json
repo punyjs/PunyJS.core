@@ -1,16 +1,20 @@
 {
-    "net": {
-        "webSocket": {
-            "common": {
-                "encoding": "utf8"
-                , "insecure": false
-                , "listeners": {}
-            }
-            , "server": {
-                "autoListen": true
-            }
-            , "client": {
+    "core": {
+        "net": {
+            "http": {
+                "webSocket": {
+                    "common": {
+                        "encoding": "utf8"
+                        , "insecure": false
+                        , "listeners": {}
+                    }
+                    , "server": {
+                        "autoListen": true
+                    }
+                    , "client": {
 
+                    }
+                }
             }
         }
     }

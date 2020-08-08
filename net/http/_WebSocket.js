@@ -83,7 +83,7 @@ function _WebSocket(
         );
         //add the common config
         utils_applyIf(
-            defaults.net.webSocket.common
+            defaults.core.net.http.webSocket.common
             , config
         );
         //if a server, add the clients collection
@@ -91,14 +91,14 @@ function _WebSocket(
             config.clients = Object.create(null);
             //add any default server configurations
             utils_applyIf(
-                defaults.net.webSocket.server
+                defaults.core.net.http.webSocket.server
                 , config
             );
         }
         else {
             //add any default client configurations
             utils_applyIf(
-                defaults.net.webSocket.client
+                defaults.core.net.http.webSocket.client
                 , config
             );
         }
@@ -134,7 +134,7 @@ function _WebSocket(
         //unknown socket type
         else {
             throw new Error(
-                errors.invalid_socket_type
+                errors.core.net.http.invalid_socket_type
             );
         }
     }
@@ -260,7 +260,7 @@ function _WebSocket(
             onError(
                 config
                 , socketApi
-                , errors.generic_socket_error
+                , errors.core.net.http.generic_socket_error
             );
         };
         socket.onclose = function onBrowserClose(event) {
@@ -427,10 +427,10 @@ function _WebSocket(
     function getWsOptions(request) {
         var wsOptions = {};
 
-        Object.keys(constants.net.http.webSocket.headerMap)
+        Object.keys(constants.core.net.http.webSocket.headerMap)
         .forEach(function forEachOption(option) {
             var header = request.headers[
-                constants.net.http.webSocket.headerMap[option]
+                constants.core.net.http.webSocket.headerMap[option]
             ];
             wsOptions[option] = header;
         });
@@ -444,14 +444,14 @@ function _WebSocket(
         var headers = request.headers
         , headerKeys = Object.keys(headers)
         , requiredKeys =
-            constants.net.http.webSocket.handshake.client.requiredHeaders
+            constants.core.net.http.webSocket.handshake.client.requiredHeaders
         , passed = requiredKeys.every(function forEachReqKey(key) {
             return headerKeys.indexOf(key) !== -1;
         });
         //throw an error if ay are missing
         if (!passed) {
             throw new Error(
-                `${errors.invalid_websocket_request}`
+                `${errors.core.net.http.invalid_websocket_request}`
             );
         }
         ///TODO: verify the Origin
@@ -462,7 +462,7 @@ function _WebSocket(
     */
     function respondClientHandshake(socketApi, wsOptions) {
         //create the response key
-        var keyCode = `${wsOptions.key}${constants.net.http.webSocket.guid}`
+        var keyCode = `${wsOptions.key}${constants.core.net.http.webSocket.guid}`
         , keySha1 = security_crypto.sha1(
             keyCode
         )
@@ -491,7 +491,7 @@ function _WebSocket(
     function closeClientSockets(clients) {
         /// LOGGING
         reporter.tcp(
-            info.socket_server_closing_clients
+            info.core.net.http.socket_server_closing_clients
         );
         /// END LOGGING
         for(key in clients) {
@@ -514,7 +514,7 @@ function _WebSocket(
     function onOpen(config, socketApi) {
         /// LOGGING
         reporter.tcp(
-            `${info.socket_client_opening}`
+            `${info.core.net.http.socket_client_opening}`
         );
         /// END LOGGING
         ///EVENT open
@@ -573,7 +573,7 @@ function _WebSocket(
         if (!fragment.fin) {
             /// LOGGING
             reporter.tcp(
-                `${info.socket_frame_received} (length ${fragment.payload.length})`
+                `${info.core.net.http.socket_frame_received} (length ${fragment.payload.length})`
             );
             /// END LOGGING
             return;
@@ -598,7 +598,7 @@ function _WebSocket(
     function onMessage(config, socketApi, message) {
         /// LOGGING
         reporter.tcp(
-            `${info.socket_message_received} (length ${message.length})`
+            `${info.core.net.http.socket_message_received} (length ${message.length})`
         );
         /// END LOGGING
         ///EVENT message
@@ -668,7 +668,7 @@ function _WebSocket(
     function onServerClose(config, serverApi, clients) {
         /// LOGGING
         reporter.tcp(
-            info.server_closing
+            info.core.net.http.server_closing
         );
         /// END LOGGING
         //close all client sockets
@@ -695,7 +695,7 @@ function _WebSocket(
     function onClose(config, socketApi, serverClients) {
         /// LOGGING
         reporter.tcp(
-            info.socket_client_closing
+            info.core.net.http.socket_client_closing
         );
         /// END LOGGING
         //if we have a server clients collection, try removing the socket
