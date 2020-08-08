@@ -25,6 +25,10 @@ function _Crypto(
             "enumerable": true
             , "value": fillRandomBytes
         }
+        , "fillRandomBytesSync": {
+            "enumerable": true
+            , "value": fillRandomBytesSync
+        }
         , "sha1": {
             "enumerable": true
             , "value": sha1
@@ -38,12 +42,58 @@ function _Crypto(
     /**
     * @function
     */
-    function fillRandomBytes(typedArray, ...params) {
+    function fillRandomBytesSync(typedArray, ...params) {
         if (isBrowser) {
-            browser_crypto.getRandomValues(typedArray);
+            browser_crypto.getRandomValues(
+                typedArray
+            );
         }
         else {
-            node_crypto.randomFillSync(typedArray, params[0], params[1]);
+            node_crypto.randomFillSync(
+                typedArray
+                , params[0]
+                , params[1]
+            );
+        }
+    }
+    /**
+    * @function
+    */
+    function fillRandomBytes(typedArray, ...params) {
+        return new promise(
+            fillRandomBytesPromise.bind(null, typedArray, params)
+        );
+    }
+    /**
+    * @function
+    */
+    function fillRandomBytesPromise(typedArray, params, resolve, reject) {
+        try {
+            if (isBrowser) {
+                browser_crypto.getRandomValues(
+                    typedArray
+                );
+                resolve();
+            }
+            else {
+                //for node use the randomFill async method
+                node_crypto.randomFill(
+                    typedArray
+                    , params[0] //offset
+                    , params[1] //length
+                    , function randomFillCb(err, buf) {
+                        if (!!err) {
+                            reject(err);
+                        }
+                        else {
+                            resolve();
+                        }
+                    }
+                );
+            }
+        }
+        catch(ex) {
+            reject(ex);
         }
     }
     /**

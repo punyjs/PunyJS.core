@@ -6,7 +6,7 @@
 function _Uuid(
     timing_gregorianReform
     , timing_timestamper
-    , security_fillRandomBytes
+    , security_fillRandomBytesSync
     , is_bool
     , is_object
     , is_nill
@@ -217,7 +217,7 @@ function _Uuid(
     function addClockSeq(uuid, options) {
         //if there isn't a clock seq then generate a random number to be safe
         if (is_nill(options.clockSeq)) {
-             security_fillRandomBytes(uuid[3]);
+             security_fillRandomBytesSync(uuid[3]);
         }
         //otherwise increment the clock sequence
         else {
@@ -280,13 +280,13 @@ function _Uuid(
     * @function
     */
     function addRandom(uuid, options) {
-        security_fillRandomBytes(uuid[0]);
-        security_fillRandomBytes(uuid[1]);
-        security_fillRandomBytes(uuid[2]);
+        security_fillRandomBytesSync(uuid[0]);
+        security_fillRandomBytesSync(uuid[1]);
+        security_fillRandomBytesSync(uuid[2]);
         //clear the top 4 bits of the time high version
         uuid[2][0] = uuid[2][0] & 0x0F;
-        security_fillRandomBytes(uuid[3]);
-        security_fillRandomBytes(uuid[4]);
+        security_fillRandomBytesSync(uuid[3]);
+        security_fillRandomBytesSync(uuid[4]);
     }
     /**
     * @function
