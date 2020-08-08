@@ -10,12 +10,13 @@ function _WebSocket(
     , url
     , net_http_httpMessage
     , net_http_frameOpcodes
-    , net_http_webSocketEventEmitter
+    , eventEmitter
     , security_crypto
     , utils_guid
     , utils_applyIf
     , is_object
     , is_string
+    , is_nill
     , encode
     , decode
     , reporter
@@ -34,14 +35,14 @@ function _WebSocket(
     */
     , frameOpcodes = net_http_frameOpcodes
     /**
-    * @alias
-    */
-    , webSocketEventEmitter = net_http_webSocketEventEmitter
-    /**
     * @switch
     */
     , isBroswer = !!browser_webSocket
+
+    , MAX_SIZE_64 = BigInt(18446744073709551614)
     ;
+
+    return WebSocket;
 
     /**
     * @worker
@@ -55,7 +56,7 @@ function _WebSocket(
     *       @param {number} [timeout] The number of milliseconds to wait ...
     *       @param {object} listeners A collection of listener functions, the key being the event to listen for, i.e. `close` listens for `onclose`, and the value is the function that will handle the event
     */
-    return function WebSocket(config) {
+    function WebSocket(config) {
         //validate and initialize the configuration
         initializeConfig(
             config
@@ -479,10 +480,12 @@ function _WebSocket(
                     , "sec-websocket-accept": key64
                 }
             }
-        );
+        )
+        ;
         //send the response
         socketApi.send(
             response
+            , true
         );
     }
     /**
@@ -541,7 +544,7 @@ function _WebSocket(
         )
         , message
         ;
-        //if there is more then store the fragment
+        //if there is more, then store the fragment
         if (fragment.hasMore) {
             return;
         }
@@ -584,7 +587,6 @@ function _WebSocket(
         //cleanup
         delete socketApi.buffer;
 
-        //if this is
         onMessage(
             config
             , socketApi
@@ -678,7 +680,6 @@ function _WebSocket(
         ///EVENT serverclose
         serverApi.emit(
             "serverclose"
-            , error
             , serverApi
         );
         ///END EVENT
@@ -718,10 +719,10 @@ function _WebSocket(
     * @function
     */
     function createSocketApi(config, socket) {
-        //Create a uuid for the client
-        return Object.create(
-            webSocketEventEmitter
+        var socketApi = Object.create(
+            eventEmitter()
             , {
+                //Create a uuid for the client
                 "id": {
                     "enumerable": true
                     , "value": utils_guid({ "version": 4 })
@@ -732,7 +733,7 @@ function _WebSocket(
                 }
                 , "send": {
                     "enumerable": true
-                    , "value": writeToSocket.bind(null, socket)
+                    , "value": send.bind(null, config, socket)
                 }
                 , "close": {
                     "enumerable": true
@@ -740,7 +741,39 @@ function _WebSocket(
                 }
             }
         );
+
+        return socketApi;
     }
+    /**
+    * @function
+    */
+    function send(config, socket, message, isResponse) {
+       try {
+           if (isBroswer) {
+               socket.send(message);
+           }
+           else {
+               if (isResponse) {
+                   socket.write(message);
+               }
+               else {
+                   sendFrame(
+                       config
+                       , socket
+                       , message
+                   );
+               }
+           }
+           /// LOGGING
+           reporter.tcp(
+               `${info.core.net.http.socket_message_sent} (length ${message.length})`
+           );
+           /// END LOGGING
+       }
+       catch (ex) {
+           reporter.error(ex);
+       }
+   }
     /**
     * @function
     */
@@ -849,9 +882,88 @@ function _WebSocket(
         return fragment;
     }
     /**
+    * Sends a web socket frame. Fragments the payload if needed, based on fragment size in the config. If a client socket, creates a masking key and masks the payload. Adds the web socket headers and sends the fragment on the wire.
+    * @function
+    */
+    function sendFrame(config, socket, payload) {
+        var isTextPayload = !!is_string(payload)
+        , frameList = new Array(5)
+        , payloadBuffer = isTextPayload
+            ? node_buffer.from(
+                payload
+            )
+            : payload
+        , payloadLen
+        , finOpBuffer = node_buffer.from(
+            isTextPayload
+                ? [0x81]
+                : [0x82]
+            )
+        , maskingKeyBuffer = !!socket.isClient
+            ? node_buffer.alloc(4)
+            : null
+        , payloadLenBuffer = node_buffer.alloc(1)
+        , extPayloadLenBuffer
+        , frameIndex = 2
+        , frameBuffer
+        ;
+        payloadLen = BigInt(payloadBuffer.length);
+        //add the length
+        if (payloadLen < 127) {
+            payloadLenBuffer[0] = payloadBuffer.length;
+        }
+        else if (payloadLen < 65536) {
+            payloadLenBuffer[0] = 126;
+            extPayloadLenBuffer = node_buffer.alloc(2);
+            extPayloadLenBuffer.writeBigInt16BE(payloadLen);
+        }
+        else if (payloadLen < MAX_SIZE_64) {
+            payloadLenBuffer[0] = 127;
+            extPayloadLenBuffer = node_buffer.alloc(8);
+            extPayloadLenBuffer.writeBigInt64BE(payloadLen);
+        }
+        else {
+            //too large
+            throw new Error(
+                `${errors.core.net.http.payload_exceeds_max_size}`
+            );
+        }
+        //create a masking key, mask the payload, if this is a client
+        if (!!maskingKeyBuffer) {
+            //create the masking key by filling random bytes
+            security_crypto.fillRandomBytes(maskingKeyBuffer);
+            //mask the payload
+            maskPayload(
+                payloadBuffer
+                , maskingKeyBuffer
+            );
+            //set the mask bit
+            payloadLenBuffer[0] = payloadLenBuffer[0] | 0x08;
+        }
+        //create the list of buffers to concatinate into a single frame buffer
+        frameList[0] = finOpBuffer;
+        frameList[1] = payloadLenBuffer;
+        if (!!extPayloadLenBuffer) {
+            frameList[frameIndex++] = extPayloadLenBuffer;
+        }
+        if (!!maskingKeyBuffer) {
+            frameList[frameIndex++] = maskingKeyBuffer;
+        }
+        frameList[frameIndex] = payloadBuffer;
+        while(frameList[frameList.length - 1] === undefined) {
+            frameList.pop();
+        }
+        frameBuffer = node_buffer.concat(
+            frameList
+        );
+
+        socket.write(frameBuffer);
+    }
+    /**
     * @function
     */
     function handleControlCode(config, socketApi, fragment) {
+        ///TODO: implement logic for other control codes
         if (fragment.opcode === "8") {
             socketApi.close();
         }
@@ -875,17 +987,7 @@ function _WebSocket(
             }
         }
     }
-    /**
-    * @function
-    */
-    function writeToSocket(socket, message) {
-        if (isBroswer) {
-            socket.send(message);
-        }
-        else {
-            socket.write(message);
-        }
-    }
+
     /**
     * @function
     */
