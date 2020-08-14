@@ -410,7 +410,7 @@ function _WebSocket(
             , wsOptions
         );
         //if this didn't pass the client verification it might be a http request
-        if (!passed) {
+        if (!verified) {
             //run the web handler if there is one
             if (is_func(config.webHandler)) {
                 config.webHandler(
