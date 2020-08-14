@@ -367,23 +367,28 @@ function _WebSocket(
     * @function
     */
     function onClientMessage(config, clientSocketApi, message) {
-        if (!clientSocketApi.socketReady) {
-            answerClientHandshake(
-                config
-                , clientSocketApi
-                , message
-            );
-            onOpen(
-                config
-                , clientSocketApi
-            );
+        try {
+            if (!clientSocketApi.socketReady) {
+                answerClientHandshake(
+                    config
+                    , clientSocketApi
+                    , message
+                );
+                onOpen(
+                    config
+                    , clientSocketApi
+                );
+            }
+            else {
+                onFrame(
+                    config
+                    , clientSocketApi
+                    , message
+                );
+            }
         }
-        else {
-            onFrame(
-                config
-                , clientSocketApi
-                , message
-            );
+        catch(ex) {
+            reporter.error(ex);
         }
     }
     /**
@@ -396,12 +401,29 @@ function _WebSocket(
         )
         , wsOptions = getWsOptions(
             request
-        );
+        )
         //verify the headers and url/origin
-        verifyClientRequest(
-            request
+        , verified = verifyClientRequest(
+            config
+            , socketApi
+            , request
             , wsOptions
         );
+        //if this didn't pass the client verification it might be a http request
+        if (!passed) {
+            //run the web handler if there is one
+            if (is_func(config.webHandler)) {
+                config.webHandler(
+                    request
+                    , socketApi
+                );
+                return;
+            }
+            throw new Error(
+                `${errors.core.net.http.invalid_websocket_request}`
+            );
+        }
+
         //add the headers and
         Object.defineProperties(
             socketApi
@@ -441,7 +463,7 @@ function _WebSocket(
     /**
     * @function
     */
-    function verifyClientRequest(request, wsOptions) {
+    function verifyClientRequest(config, socketApi, request, wsOptions) {
         var headers = request.headers
         , headerKeys = Object.keys(headers)
         , requiredKeys =
@@ -449,14 +471,10 @@ function _WebSocket(
         , passed = requiredKeys.every(function forEachReqKey(key) {
             return headerKeys.indexOf(key) !== -1;
         });
-        //throw an error if ay are missing
-        if (!passed) {
-            throw new Error(
-                `${errors.core.net.http.invalid_websocket_request}`
-            );
-        }
         ///TODO: verify the Origin
         ///TODO: implement the rest of rfc6455
+
+        return passed;
     }
     /**
     * @function
@@ -906,21 +924,23 @@ function _WebSocket(
         , extPayloadLenBuffer
         , frameIndex = 2
         , frameBuffer
+        , payloadLen = payloadBuffer.length
         ;
-        payloadLen = BigInt(payloadBuffer.length);
         //add the length
         if (payloadLen < 127) {
-            payloadLenBuffer[0] = payloadBuffer.length;
+            payloadLenBuffer[0] = payloadLen;
         }
         else if (payloadLen < 65536) {
             payloadLenBuffer[0] = 126;
             extPayloadLenBuffer = node_buffer.alloc(2);
-            extPayloadLenBuffer.writeBigInt16BE(payloadLen);
+            extPayloadLenBuffer.writeUInt16BE(payloadLen);
         }
         else if (payloadLen < MAX_SIZE_64) {
             payloadLenBuffer[0] = 127;
             extPayloadLenBuffer = node_buffer.alloc(8);
-            extPayloadLenBuffer.writeBigInt64BE(payloadLen);
+            extPayloadLenBuffer.writeBigInt64BE(
+                BigInt(payloadLen)
+            );
         }
         else {
             //too large
