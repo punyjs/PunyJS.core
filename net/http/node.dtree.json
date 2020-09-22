@@ -3,6 +3,7 @@
         "webSocket": null
         , "crypto": null
         , "performance": null
+        , "userAgent": null
     }]
     , "node": [{
         "process": ["+require('process')"]
@@ -10,5 +11,6 @@
         , "net": ["+require('net')"]
         , "crypto": ["+require('crypto')"]
         , "buffer": ["+Buffer"]
+        , "os": ["+require('os')"]
     }]
 }

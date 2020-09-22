@@ -1,0 +1,38 @@
+{
+    "Firefox": {
+        "contain": ["firefox"]
+        , "notcontain": ["seamonkey"]
+    }
+    , "Seamonkey": {
+        "contain": ["seamonkey"]
+        , "notcontain": []
+    }
+    , "Chrome": {
+        "contain": ["chrome"]
+        , "notcontain": ["chromium", "edge"]
+    }
+    , "Chromium": {
+        "contain": ["chromium"]
+        , "notcontain": []
+    }
+    , "Safari": {
+        "contain": ["safari"]
+        , "notcontain": ["chrome", "chromium", "edge"]
+    }
+    , "Opera": {
+        "contain": ["opera", "opr"]
+        , "notcontain": []
+    }
+    , "IE": {
+        "contain": ["msie"]
+        , "notcontain": []
+    }
+    , "Edge": {
+        "contain": ["edge"]
+        , "notcontain": []
+    }
+    , "NodeJS": {
+        "contain": ["node","nodejs"]
+        , "notcontain": []
+    }
+}

@@ -3,6 +3,7 @@
         "webSocket": ["+WebSocket"]
         , "crypto": ["+window.crypto"]
         , "performance": ["+performance"]
+        , "userAgent": ["+window.navigator.userAgent"]
     }]
     , "node": [{
         "process": null
@@ -10,5 +11,6 @@
         , "net": null
         , "crypto": null
         , "buffer": null
+        , "os": null
     }]
 }

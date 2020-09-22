@@ -16,10 +16,10 @@
         ":PunyJS.core.net.http.Constants"
         , {"conflictResolution": "error"}
     ]
-    , "url": ["+URL"]
     , "utils": [{
         "applyIf": [":PunyJS.core.object.ApplyIf"]
         , "guid": [":PunyJS.core.data._Uuid",[]]
+        , "regex": [":PunyJS.core.utils._RegEx",[]]
     }]
     , "is": [{
         "string": [":PunyJS.core.is.String"]
@@ -33,9 +33,15 @@
         "http": [{
             "httpMessage": [":PunyJS.core.net.http._HttpMessage",[]]
             , "webSocket": [":PunyJS.core.net.http._WebSocket",[]]
+            , "webSocketFrame": [":PunyJS.core.net.http._WebSocketFrame",[]]
+            , "webSocketHandshake": [":PunyJS.core.net.http._WebSocketHandshake",[]]
+            , "webSocketApi": [":PunyJS.core.net.http._WebSocketApi",[]]
             , "statusCodes": [":PunyJS.core.net.http.StatusCodes"]
             , "readyStates": [":PunyJS.core.net.http.ReadyStates"]
             , "frameOpcodes": [":PunyJS.core.net.http.FrameOpcodes"]
+            , "userAgentRules": [":PunyJS.core.net.http.UserAgentRules"]
+            , "userAgent": [":PunyJS.core.net.http._UserAgent",[]]
+            , "url": ["+URL"]
         }]
     }]
 }

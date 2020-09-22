@@ -3,22 +3,16 @@
 * @factory
 */
 function _WebSocket(
-    browser_webSocket
+    promise
+    , browser_webSocket
     , node_tls
     , node_net
-    , node_buffer
-    , url
-    , net_http_httpMessage
-    , net_http_frameOpcodes
-    , eventEmitter
-    , security_crypto
-    , utils_guid
+    , net_http_url
+    , net_http_webSocketFrame
+    , net_http_webSocketHandshake
+    , net_http_webSocketApi
     , utils_applyIf
     , is_object
-    , is_string
-    , is_nill
-    , encode
-    , decode
     , reporter
     , info
     , defaults
@@ -29,17 +23,23 @@ function _WebSocket(
     /**
     * @alias
     */
-    var httpMessage = net_http_httpMessage
+    var webSocketFrame = net_http_webSocketFrame
     /**
     * @alias
     */
-    , frameOpcodes = net_http_frameOpcodes
+    , webSocketHandshake = net_http_webSocketHandshake
+    /**
+    * @alias
+    */
+    , webSocketApi = net_http_webSocketApi
+    /**
+    * @alias
+    */
+    , url = net_http_url
     /**
     * @switch
     */
     , isBroswer = !!browser_webSocket
-
-    , MAX_SIZE_64 = BigInt(18446744073709551614)
     ;
 
     return WebSocket;
@@ -73,6 +73,7 @@ function _WebSocket(
     * @function
     */
     function initializeConfig(config) {
+        var configUrl;
         ///INPUT VALIDATION
         validateConfig(
             config
@@ -102,6 +103,12 @@ function _WebSocket(
                 defaults.core.net.http.webSocket.client
                 , config
             );
+            if (!!config.url && !config.hostname) {
+                configUrl = new url(
+                    config.url
+                );
+                config.hostname = configUrl.hostname;
+            }
         }
     }
     /**
@@ -188,15 +195,13 @@ function _WebSocket(
                 config
             )
         //create the socket api
-        , socketApi = createSocketApi(
-            config
-            , socket
-        )
-        ;
-        //set the encoding
-        socket.setEncoding(config.encoding);
+        , socketApi = webSocketApi(
+           config
+           , socket
+           , true
+       );
         //add the listeners
-        stream.on(
+        socket.on(
             "open"
             , onOpen.bind(
                 null
@@ -204,12 +209,13 @@ function _WebSocket(
                 , socketApi
             )
         );
-        stream.on(
+        socket.on(
             "data"
-            , onMessage.bind(
+            , webSocketFrame.handle.bind(
                 null
                 , config
                 , socketApi
+                , onMessage
             )
         );
         socket.on(
@@ -229,6 +235,12 @@ function _WebSocket(
             )
         );
 
+        //send the handshake
+        webSocketHandshake.sendClient(
+            config
+            , socketApi
+        );
+
         return socketApi;
     }
     /**
@@ -239,12 +251,13 @@ function _WebSocket(
             config.url
         )
         //create the socket api
-        , socketApi = createSocketApi(
+        , socketApi = webSocketApi(
             config
             , socket
         );
         //setup the listeners
         socket.onopen = function onBrowserOpen(event) {
+            socketApi.socketReady = true;
             onOpen(
                 config
                 , socketApi
@@ -292,7 +305,7 @@ function _WebSocket(
                 , clients
             )
         )
-        , serverApi = createSocketApi(
+        , serverApi = webSocketApi(
             config
             , server
             , clients
@@ -329,7 +342,7 @@ function _WebSocket(
     */
     function onClientConnect(config, serverApi, clients, clientSocket) {
         //create the client socket api
-        var clientSocketApi = createSocketApi(
+        var clientSocketApi = webSocketApi(
             config
             , clientSocket
         );
@@ -347,11 +360,13 @@ function _WebSocket(
         //add a data handler for the handlshake
         clientSocket.on(
             "data"
-            , onClientMessage.bind(
-                null
-                , config
-                , clientSocketApi
-            )
+            , function onData(message) {
+                onClientFrame(
+                    config
+                    , clientSocketApi
+                    , message
+                );
+            }
         );
         //
         clientSocket.on(
@@ -366,23 +381,34 @@ function _WebSocket(
     /**
     * @function
     */
-    function onClientMessage(config, clientSocketApi, message) {
+    function onClientFrame(config, clientSocketApi, message) {
         try {
+            //if the socket is marked ready then this is a handshake request
             if (!clientSocketApi.socketReady) {
-                answerClientHandshake(
+                webSocketHandshake.handle(
                     config
                     , clientSocketApi
                     , message
-                );
-                onOpen(
-                    config
-                    , clientSocketApi
-                );
+                )
+                //then signal open after the handshake is done
+                .then(function thenSignalOpen() {
+                    return onOpen(
+                        config
+                        , clientSocketApi
+                    );
+                })
+                .catch(function catchHandshakeError(error) {
+                    clientSocketApi.exception = error;
+                    reporter.error(
+                        error
+                    );
+                });
             }
             else {
-                onFrame(
+                webSocketFrame.handle(
                     config
                     , clientSocketApi
+                    , onMessage
                     , message
                 );
             }
@@ -390,121 +416,6 @@ function _WebSocket(
         catch(ex) {
             reporter.error(ex);
         }
-    }
-    /**
-    * @function
-    */
-    function answerClientHandshake(config, socketApi, message) {
-        //process the text message
-        var request = httpMessage.decodeHttpRequest(
-            message
-        )
-        , wsOptions = getWsOptions(
-            request
-        )
-        //verify the headers and url/origin
-        , verified = verifyClientRequest(
-            config
-            , socketApi
-            , request
-            , wsOptions
-        );
-        //if this didn't pass the client verification it might be a http request
-        if (!verified) {
-            //run the web handler if there is one
-            if (is_func(config.webHandler)) {
-                config.webHandler(
-                    request
-                    , socketApi
-                );
-                return;
-            }
-            throw new Error(
-                `${errors.core.net.http.invalid_websocket_request}`
-            );
-        }
-
-        //add the headers and
-        Object.defineProperties(
-            socketApi
-            , {
-                "headers": {
-                    "enumerable": true
-                    , "value": request.headers
-                }
-                , "socketReady": {
-                    "enumerable": true
-                    , "value": true
-                }
-            }
-        );
-        //send the response
-        respondClientHandshake(
-            socketApi
-            , wsOptions
-        );
-    }
-    /**
-    * @function
-    */
-    function getWsOptions(request) {
-        var wsOptions = {};
-
-        Object.keys(constants.core.net.http.webSocket.headerMap)
-        .forEach(function forEachOption(option) {
-            var header = request.headers[
-                constants.core.net.http.webSocket.headerMap[option]
-            ];
-            wsOptions[option] = header;
-        });
-
-        return wsOptions;
-    }
-    /**
-    * @function
-    */
-    function verifyClientRequest(config, socketApi, request, wsOptions) {
-        var headers = request.headers
-        , headerKeys = Object.keys(headers)
-        , requiredKeys =
-            constants.core.net.http.webSocket.handshake.client.requiredHeaders
-        , passed = requiredKeys.every(function forEachReqKey(key) {
-            return headerKeys.indexOf(key) !== -1;
-        });
-        ///TODO: verify the Origin
-        ///TODO: implement the rest of rfc6455
-
-        return passed;
-    }
-    /**
-    * @function
-    */
-    function respondClientHandshake(socketApi, wsOptions) {
-        //create the response key
-        var keyCode = `${wsOptions.key}${constants.core.net.http.webSocket.guid}`
-        , keySha1 = security_crypto.sha1(
-            keyCode
-        )
-        , key64 = encode.toBase64(
-            keySha1
-        )
-        //create the http response
-        , response = httpMessage.encodeHttpResponse(
-            {
-                "statusCode": "101"
-                , "headers": {
-                    "upgrade": "websocket"
-                    , "connection": "upgrade"
-                    , "sec-websocket-accept": key64
-                }
-            }
-        )
-        ;
-        //send the response
-        socketApi.send(
-            response
-            , true
-        );
     }
     /**
     * @function
@@ -544,78 +455,15 @@ function _WebSocket(
             , socketApi
         );
         ///END EVENT
-        if (config.listeners.open) {
-            config.listeners.open(
-                socketApi
-            );
-        }
-    }
-    /**
-    * @function
-    */
-    function onFrame(config, socketApi, frame) {
-        //process the frame
-        var fragment = processFrame(
-            config
-            , socketApi
-            , frame
-        )
-        , message
-        ;
-        //if there is more, then store the fragment
-        if (fragment.hasMore) {
-            return;
-        }
-        //see if this is a control code, if so handle it and return
-        if (fragment.opcode > 2) {
-            handleControlCode(
-                config
-                , socketApi
-                , fragment
-            );
-            return;
-        }
-
-        //update the buffer
-        if (!!socketApi.buffer) {
-            socketApi.buffer =
-                node_buffer.concat(
-                    [
-                        socketApi.buffer
-                        , fragment.payload
-                    ]
-                );
-        }
-        else {
-            socketApi.buffer = fragment.payload;
-        }
-
-        //if this isn't the final frame then stop here
-        if (!fragment.fin) {
-            /// LOGGING
-            reporter.tcp(
-                `${info.core.net.http.socket_frame_received} (length ${fragment.payload.length})`
-            );
-            /// END LOGGING
-            return;
-        }
-
-        //get the message from the buffer
-        message = socketApi.buffer;
-        //cleanup
-        delete socketApi.buffer;
-
-        onMessage(
-            config
-            , socketApi
-            , message
-        );
     }
     /**
     * Handles a message from the server
     * @function
     */
     function onMessage(config, socketApi, message) {
+        if (!socketApi.socketReady) {
+            return;
+        }
         /// LOGGING
         reporter.tcp(
             `${info.core.net.http.socket_message_received} (length ${message.length})`
@@ -628,12 +476,6 @@ function _WebSocket(
             , socketApi
         );
         ///END EVENT
-        if (config.listeners.message) {
-            config.listeners.message(
-                message
-                , socketApi
-            );
-        }
     }
     /**
     * Handles errors on the client socket
@@ -652,12 +494,6 @@ function _WebSocket(
             , error
         );
         ///END EVENT
-        if (config.listeners.error) {
-            config.listeners.error(
-                error
-                , socketApi
-            );
-        }
     }
     /**
     * @function
@@ -675,12 +511,6 @@ function _WebSocket(
             , serverApi
         );
         ///END EVENT
-        if (config.listeners.serverError) {
-            config.listeners.serverError(
-                error
-                , serverApi
-            );
-        }
     }
     /**
     * @function
@@ -701,11 +531,6 @@ function _WebSocket(
             , serverApi
         );
         ///END EVENT
-        if (config.listeners.serverClose) {
-            config.listeners.serverClose(
-                serverApi
-            );
-        }
     }
     /**
     * Handles the closing of the client socket
@@ -725,308 +550,5 @@ function _WebSocket(
             "close"
             , socketApi
         );
-        if (config.listeners.close) {
-            config.listeners.close(
-                socketApi
-            );
-        }
-    }
-
-    /**
-    * Creates the socket api object with the standard properties
-    * @function
-    */
-    function createSocketApi(config, socket) {
-        var socketApi = Object.create(
-            eventEmitter()
-            , {
-                //Create a uuid for the client
-                "id": {
-                    "enumerable": true
-                    , "value": utils_guid({ "version": 4 })
-                }
-                , "status": {
-                    "enumerable": true
-                    , "get": getSocketStatus.bind(null, socket)
-                }
-                , "send": {
-                    "enumerable": true
-                    , "value": send.bind(null, config, socket)
-                }
-                , "close": {
-                    "enumerable": true
-                    , "value": closeSocket.bind(null, config, socket)
-                }
-            }
-        );
-
-        return socketApi;
-    }
-    /**
-    * @function
-    */
-    function send(config, socket, message, isResponse) {
-       try {
-           if (isBroswer) {
-               socket.send(message);
-           }
-           else {
-               if (isResponse) {
-                   socket.write(message);
-               }
-               else {
-                   sendFrame(
-                       config
-                       , socket
-                       , message
-                   );
-               }
-           }
-           /// LOGGING
-           reporter.tcp(
-               `${info.core.net.http.socket_message_sent} (length ${message.length})`
-           );
-           /// END LOGGING
-       }
-       catch (ex) {
-           reporter.error(ex);
-       }
-   }
-    /**
-    * @function
-    */
-    function processFrame(config, socketApi, frame) {
-        var fragment;
-        //process the additional data from the fragment
-        if (!!socketApi.fragment) {
-            fragment = socketApi.fragment;
-            //combine the payload and the frame
-            fragment.payload =
-                node_buffer.concat(
-                    [
-                        fragment.payload
-                        , frame
-                    ]
-                );
-            //see if there is more
-            if (fragment.payloadLength == fragment.payload.length) {
-                fragment.hasMore = false;
-                delete socketApi.fragment;
-                //unmask the payload
-                maskPayload(
-                    fragment.payload
-                    , fragment.maskingKey
-                );
-            }
-
-            return fragment;
-        }
-        //decypher the frame headers
-        var hasMaskByte = frame.length > 1
-        , mask = !!hasMaskByte
-            && frame[1].toString(2)[0] === "1"
-        , lenCode = !!hasMaskByte
-            && frame[1] & 0x7f
-        , frstByte = frame[0].toString(2)
-        , opCode = frame[0].toString(16)[1]
-        , payloadLength
-        , maskingKeyOffset
-        , payloadOffset
-        ;
-
-        //if the length code is 127 we are using 8 bytes
-        if (lenCode === 127) {
-            payloadLength = frame.slice(2, 10)
-                .readBigInt64BE();
-            maskingKeyOffset = 10;
-        }
-        //if the length code is 126 we are using 2 bytes
-        else if (lenCode === 126) {
-            payloadLength = frame.slice(2, 4)
-                .readInt16BE();
-            maskingKeyOffset = 4;
-        }
-        //else we are using the length code fof the length
-        else {
-            payloadLength = lenCode;
-            maskingKeyOffset = 2;
-        }
-
-        payloadOffset = maskingKeyOffset;
-
-        if (mask) {
-            payloadOffset+= 4;
-        }
-
-        //create the fragment
-        fragment = {
-            "fin": frstByte[0] === "1"
-            , "rsv1": frstByte[1] === "1"
-            , "rsv2": frstByte[2] === "1"
-            , "rsv3": frstByte[3] === "1"
-            , "opcode": opCode
-            , "opName": frameOpcodes[opCode]
-            , "mask": mask
-            , "maskingKey": mask
-                ? frame.slice(
-                    maskingKeyOffset
-                    , payloadOffset
-                )
-                : null
-            , "payloadLength": payloadLength
-            , "payload": frame.slice(
-                payloadOffset
-            )
-        };
-
-        fragment.hasMore = payloadLength > fragment.payload.length;
-
-        if (fragment.hasMore) {
-            if (!socketApi.fragment) {
-                socketApi.fragment = fragment;
-            }
-        }
-        else {
-            //unmask the payload
-            maskPayload(
-                fragment.payload
-                , fragment.maskingKey
-            );
-        }
-
-        //validate the fragment
-        ///TODO: validate the frogment as per rfc6455
-
-        return fragment;
-    }
-    /**
-    * Sends a web socket frame. Fragments the payload if needed, based on fragment size in the config. If a client socket, creates a masking key and masks the payload. Adds the web socket headers and sends the fragment on the wire.
-    * @function
-    */
-    function sendFrame(config, socket, payload) {
-        var isTextPayload = !!is_string(payload)
-        , frameList = new Array(5)
-        , payloadBuffer = isTextPayload
-            ? node_buffer.from(
-                payload
-            )
-            : payload
-        , payloadLen
-        , finOpBuffer = node_buffer.from(
-            isTextPayload
-                ? [0x81]
-                : [0x82]
-            )
-        , maskingKeyBuffer = !!socket.isClient
-            ? node_buffer.alloc(4)
-            : null
-        , payloadLenBuffer = node_buffer.alloc(1)
-        , extPayloadLenBuffer
-        , frameIndex = 2
-        , frameBuffer
-        , payloadLen = payloadBuffer.length
-        ;
-        //add the length
-        if (payloadLen < 127) {
-            payloadLenBuffer[0] = payloadLen;
-        }
-        else if (payloadLen < 65536) {
-            payloadLenBuffer[0] = 126;
-            extPayloadLenBuffer = node_buffer.alloc(2);
-            extPayloadLenBuffer.writeUInt16BE(payloadLen);
-        }
-        else if (payloadLen < MAX_SIZE_64) {
-            payloadLenBuffer[0] = 127;
-            extPayloadLenBuffer = node_buffer.alloc(8);
-            extPayloadLenBuffer.writeBigInt64BE(
-                BigInt(payloadLen)
-            );
-        }
-        else {
-            //too large
-            throw new Error(
-                `${errors.core.net.http.payload_exceeds_max_size}`
-            );
-        }
-        //create a masking key, mask the payload, if this is a client
-        if (!!maskingKeyBuffer) {
-            //create the masking key by filling random bytes
-            security_crypto.fillRandomBytes(maskingKeyBuffer);
-            //mask the payload
-            maskPayload(
-                payloadBuffer
-                , maskingKeyBuffer
-            );
-            //set the mask bit
-            payloadLenBuffer[0] = payloadLenBuffer[0] | 0x08;
-        }
-        //create the list of buffers to concatinate into a single frame buffer
-        frameList[0] = finOpBuffer;
-        frameList[1] = payloadLenBuffer;
-        if (!!extPayloadLenBuffer) {
-            frameList[frameIndex++] = extPayloadLenBuffer;
-        }
-        if (!!maskingKeyBuffer) {
-            frameList[frameIndex++] = maskingKeyBuffer;
-        }
-        frameList[frameIndex] = payloadBuffer;
-        while(frameList[frameList.length - 1] === undefined) {
-            frameList.pop();
-        }
-        frameBuffer = node_buffer.concat(
-            frameList
-        );
-
-        socket.write(frameBuffer);
-    }
-    /**
-    * @function
-    */
-    function handleControlCode(config, socketApi, fragment) {
-        ///TODO: implement logic for other control codes
-        if (fragment.opcode === "8") {
-            socketApi.close();
-        }
-    }
-    /**
-    * @function
-    */
-    function getSocketStatus(socket) {
-        if (isBroswer) {
-            return socket.readyState;
-        }
-        else {
-            if (socket.pending || socket.connecting) {
-                return "CONNECTING";
-            }
-            else if (socket.destroyed) {
-                return "CLOSED";
-            }
-            else {
-                return "OPEN"
-            }
-        }
-    }
-
-    /**
-    * @function
-    */
-    function closeSocket(config, socket) {
-        if (isBroswer) {
-            socket.close();
-        }
-        else {
-            socket.destroy();
-        }
-    }
-    /**
-    * @function
-    */
-    function maskPayload(payload, maskingKey) {
-        //mask/unmask the payload
-        for(let i = 0, l = payload.length, j; i < l; i++) {
-            j = i % 4;
-            payload[i] = payload[i] ^ maskingKey[j];
-        }
     }
 }

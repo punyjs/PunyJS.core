@@ -8,7 +8,9 @@
                 , "socket_client_opening": "The client socket is opening."
                 , "socket_message_received": "The socket has received a message."
                 , "socket_message_sent": "The socket has sent a message."
-                , "socket_frame_received": "The socekt has received a frame with fin false."
+                , "socket_frame_received": "The socket has received a frame."
+                , "process_handshake_response": "The socket has recieved a handshake response."
+                , "send_handshake_request": "The socket is sending a handshake request."
             }
         }
     }

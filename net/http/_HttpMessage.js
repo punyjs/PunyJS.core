@@ -50,15 +50,15 @@ function _HttpMessage(
     * @function
     */
     function encodeHttpRequest(requestObj) {
-        var method = responseObj.method || "GET"
-        , target = responseObj.target || "/"
-        , version = responseObj.version || "HTTP/1.1"
+        var method = requestObj.method || "GET"
+        , target = requestObj.target || "/"
+        , version = requestObj.version || "HTTP/1.1"
         , requestLine = `${method} ${target} ${version}`
         , headersText = stringifyHeaders(
-            responseObj.headers
+            requestObj.headers
         )
         , bodyText = stringifyBody(
-            responseObj.body
+            requestObj.body
         )
         , message = `${requestLine}\r\n${headersText}`
         ;
@@ -75,13 +75,14 @@ function _HttpMessage(
     function decodeHttpRequest(requestMessage) {
         //force the message to a string (for node Buffers)
         if (!is_string(requestMessage)) {
-            requestMessage = `${requestMessage}`;
+            requestMessage = requestMessage.toString("utf8");
         }
         var lines = requestMessage.split("\r\n")
         //extract and parse the first line
         , requestLine = lines.shift()
         , [, method, target, version]
             = requestLine.match(REQ_FIRST_LINE_PATT)
+            || [] //failsafe in case the request line doesn't match the regex
         //extract and parse the headers
         , blankLineIndex = lines.indexOf("\r\n\r\n")
         , headerLines = lines.slice(0, blankLineIndex)
@@ -142,6 +143,7 @@ function _HttpMessage(
         , statusLine = lines.shift()
         , [, version, statusCode, statusText]
             = statusLine.match(RESP_STATUS_LINE_PATT)
+            || [] //failsafe in case the status line doesn't match the regex
         //extract and parse the headers
         , blankLineIndex = lines.indexOf("\r\n\r\n")
         , headerLines = blankLineIndex !== -1
