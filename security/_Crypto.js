@@ -49,10 +49,9 @@ function _Crypto(
             );
         }
         else {
-            node_crypto.randomFillSync(
-                typedArray
-                , params[0]
-                , params[1]
+            node_crypto.randomFillSync.apply(
+                null
+                , [typedArray].concat(params)
             );
         }
     }
@@ -76,19 +75,24 @@ function _Crypto(
                 resolve();
             }
             else {
-                //for node use the randomFill async method
-                node_crypto.randomFill(
-                    typedArray
-                    , params[0] //offset
-                    , params[1] //length
-                    , function randomFillCb(err, buf) {
-                        if (!!err) {
-                            reject(err);
-                        }
-                        else {
-                            resolve();
-                        }
+                var args = params
+                //create a callback function to fulfill the promise
+                , fillCb = function randomFillCb(err, buf) {
+                    if (!!err) {
+                        reject(err);
                     }
+                    else {
+                        resolve();
+                    }
+                };
+                //add the typedArray to the begining
+                args.unshift(typedArray);
+                //add the callback function
+                args.push(fillCb);
+                //for node use the randomFill async method
+                node_crypto.randomFill.apply(
+                    null
+                    , args
                 );
             }
         }
