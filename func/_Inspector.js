@@ -21,7 +21,7 @@ function _Inspector(
     * @private
     * @static
     */
-    , FN_LOOKUP = /^[\s\r\n\t ]*function[\s\r\n\t ]*([\s\r\n\t ]*[A-z0-9_-]+[\s\r\n\t ]*)?[\s\r\n\t ]*\(((?:.|\r|\n)*?)\)[^{]*\{((?:.|\r|\n)*)\}[\s\r\n\t ]*$/i
+    , FN_LOOKUP = /^[\s]*(async[\s]+)?function[\s]*([\s]*[A-z0-9_-]+[\s]*)?[\s]*\(((?:.|\r|\n)*?)\)[^{]*\{((?:.|\r|\n)*)\}[\s]*$/i
     /**
     * RegEx used to remove the comments from a function
     * @property COM_PATT
@@ -40,7 +40,7 @@ function _Inspector(
     * A regexp pattern for removing leading and trailing whitespace
     * @property
     */
-    , WS_PATT = /(?:^[\r\n \t]+)|(?:[\r\n \t]+$)/
+    , WS_PATT = /(?:^[\s]+)|(?:[\s]+$)/
     /**
     * A regexp pattern for splitting the parameters string
     * @property
@@ -70,9 +70,10 @@ function _Inspector(
             .replace(WS_PATT, "")
         , comms = fnValue.substring(0, (fnValue.length - fnText.length))
         , match = fnText.match(FN_LOOKUP)
-        , name = !!match && match[1]
-        , params = !!match && match[2]
-        , body = !!match && match[3]
+        , async = !!match && match[1]
+        , name = !!match && match[2]
+        , params = !!match && match[3]
+        , body = !!match && match[4]
         , defaults = {};
 
         if (!match) {
@@ -135,6 +136,10 @@ function _Inspector(
             , "fnText": {
                 "enumerable": true
                 , "value": fnText
+            }
+            , "isAsync": {
+                "enumerable": true
+                , "value": async
             }
         });
     };
