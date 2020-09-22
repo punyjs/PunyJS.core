@@ -47,7 +47,7 @@ function _EventEmitter(
             }
             , "emit": {
                 "enumerable": true
-                , "value": fireEvent.bind(null, listeners)
+                , "value": fireEvent.bind(null, listeners, errors)
             }
             , "errors": {
                 "enumerable": true
@@ -129,72 +129,87 @@ function _EventEmitter(
     /**
     * @function
     */
-    function fireEvent(listeners, eventName, details) {
-        var eventListeners = listeners[eventName]
-        , runOnceIndexes = []
-        ;
-        if (is_nill(eventListeners) || eventListeners.length === 0) {
+    function fireEvent(listeners, errors, eventName, details) {
+        try {
+            var eventListeners = listeners[eventName]
+            , runOnceIndexes = []
+            ;
+            if (is_nill(eventListeners) || eventListeners.length === 0) {
+                return false;
+            }
+            //loop through the listeners
+            eventListeners.forEach(
+                executeCallback.bind(null, runOnceIndexes, details, errors)
+            );
+            //remove any run once entries
+            runOnceIndexes.forEach(
+                function forEachRunOnceIndex(runOnceIndex) {
+                    eventListeners.splice(runOnceIndex, 1);
+                }
+            );
+
+            return true;
+        }
+        catch(ex) {
+            addError(errors, ex);
             return false;
         }
-        //loop through the listeners
-        eventListeners.forEach(
-            executeCallback.bind(null, runOnceIndexes, details)
-        );
-        //remove any run once entries
-        runOnceIndexes.forEach(
-            function forEachRunOnceIndex(runOnceIndex) {
-                eventListeners.splice(runOnceIndex, 1);
-            }
-        );
-
-        return true;
     }
     /**
     * @function
     */
-    function executeCallback(runOnceIndexes, details, listener, index) {
+    function executeCallback(runOnceIndexes, details, errors, listener, index) {
         var options = listener.options
         , runAsync = details.runAsync === true
             ? true
             : !!options
-                && listener.options.runAsync
+                && options.runAsync
                 || false
+        , passed
         ;
+
         if (runAsync) {
             executeCallbackAsyncronous(
                 listener
                 , details
+                , errors
             );
         }
         else {
-            executeCallbackSyncronous(
+            passed = executeCallbackSyncronous(
                 listener
                 , details
+                , errors
             );
         }
         //remove the listener for run once
         if (!!options && options.once === true) {
             runOnceIndexes.push(index);
         }
+
+        return passed;
     }
     /**
     * @function
     */
-    function executeCallbackSyncronous(listener, details) {
+    function executeCallbackSyncronous(listener, details, errors) {
         try {
             execute(
                 listener
                 , details
-            )
+            );
+
+            return true;
         }
         catch(ex) {
-            addError(ex);
+            addError(errors, ex);
+            return false;
         }
     }
     /**
     * @function
     */
-    function executeCallbackAsyncronous(listener, details) {
+    function executeCallbackAsyncronous(listener, details, errors) {
         promise
         .resolve()
         .then(function thenExecuteListener() {
@@ -202,10 +217,10 @@ function _EventEmitter(
                 execute(
                     listener
                     , details
-                )
+                );
             }
             catch(ex) {
-                addError(ex);
+                addError(errors, ex);
             }
         });
     }
@@ -225,7 +240,7 @@ function _EventEmitter(
     /**
     * @function
     */
-    function addError(ex) {
+    function addError(errors, ex) {
         errors.push(ex);
         //drop the first member if we've surpassed the max error length
         if (errors.length > cnsts.maxErrorLength) {
