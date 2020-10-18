@@ -72,7 +72,7 @@ function _Uuid(
         }
         if (!is_object(options)) {
             throw new Error(
-                `${errors.invalid_options_argument} (${typeof options})`
+                `${errors.data.uuid.invalid_options_argument} (${typeof options})`
             );
         }
         ///END INPUT VALIDATION
@@ -140,7 +140,7 @@ function _Uuid(
         //DCE Security version, with embedded POSIX UIDs.
         else if(version == "2") {
             throw new Error(
-                `${errors.version_not_implemented} (version 2)`
+                `${errors.data.uuid.version_not_implemented} (version 2)`
             );
         }
         //The name-based version using MD5
@@ -167,7 +167,7 @@ function _Uuid(
         //no other versions
         else {
             throw new Error(
-                `${errors.invalid_uuid_version} (${version})`
+                `${errors.data.uuid.invalid_uuid_version} (${version})`
             );
         }
 
@@ -257,7 +257,7 @@ function _Uuid(
     */
     function addNode(uuid, options) {
         throw new Error(
-            `${errors.version_not_implemented} (version 1)`
+            `${errors.data.uuid.version_not_implemented} (version 1)`
         );
     }
     /**
@@ -265,7 +265,7 @@ function _Uuid(
     */
     function addMd5Hash(uuid, options) {
         throw new Error(
-            `${errors.version_not_implemented} (version 3)`
+            `${errors.data.uuid.version_not_implemented} (version 3)`
         );
     }
     /**
@@ -273,7 +273,7 @@ function _Uuid(
     */
     function addSha1Hash(uuid, options) {
         throw new Error(
-            `${errors.version_not_implemented} (version 5)`
+            `${errors.data.uuid.version_not_implemented} (version 5)`
         );
     }
     /**
