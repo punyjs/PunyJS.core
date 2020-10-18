@@ -280,7 +280,7 @@ function _UserAgent(
     function parseVersion(ver) {
         var vera = ver.split(/\.|\+/)
         , verObj = {}
-        , map=['major', 'minor', 'tick', 'build']
+        , map=['major', 'minor', 'patch', 'build']
         ;
         for (let i = 0; i < 4; i++) {
             verObj[map[i]] = vera[i]
