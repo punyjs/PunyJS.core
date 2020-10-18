@@ -1,4 +1,8 @@
 {
-    "uuidFormat": "ieee"
-    , "uuidVersion": "1"
+    "data": {
+        "uuid": {
+            "uuidFormat": "ieee"
+            , "uuidVersion": "1"
+        }
+    }
 }

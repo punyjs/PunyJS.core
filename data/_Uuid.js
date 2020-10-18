@@ -67,7 +67,7 @@ function _Uuid(
         }
         if (is_bool(options)) {
             options = {
-                "format": options || defaults.uuidFormat
+                "format": options || defaults.data.uuid.uuidFormat
             };
         }
         if (!is_object(options)) {
@@ -78,10 +78,10 @@ function _Uuid(
         ///END INPUT VALIDATION
         ///DEFAULTS
         if (!options.version) {
-            options.version = defaults.uuidVersion;
+            options.version = defaults.data.uuid.uuidVersion;
         }
         if (!options.format) {
-            options.format = defaults.uuidFormat;
+            options.format = defaults.data.uuid.uuidFormat;
         }
         ///END DEFAULTS
         //if there is a last id then get the clock sequence
