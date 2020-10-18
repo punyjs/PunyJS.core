@@ -19,7 +19,7 @@
     , "utils": [{
         "applyIf": [":PunyJS.core.object.ApplyIf"]
         , "guid": [":PunyJS.core.data._Uuid",[]]
-        , "regex": [":PunyJS.core.utils._RegEx",[]]
+        , "regex": [":PunyJS.core.regexp._RegExp",[]]
     }]
     , "is": [{
         "string": [":PunyJS.core.is.String"]
