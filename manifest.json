@@ -1,18 +1,22 @@
 {
-    "name": "PunyJS.core"
-    , "description": "A library of base root scoped functions and several helper"
+    "name": "punyjs-core"
+    , "description": "A library of core dependencies"
+
+    , "config": {
+        "strict": true
+    }
+
+    , "iocNamePrefix": "ioc-controller"
+    , "iocType": "monolith"
+    , "appType": "ioc.${iocType}"
+
+    , "base": [
+        "{PunyJS.core.proxy}/dtree.json"
+    ]
 
     , "entries": [
-
-        {
-            "type": "javascript"
-            , "output": "builds/{name}/app.js"
-        }
-
-        , {
-            "type": "test"
-            , "output": "builds/{name}"
-        }
-
+        "{PunyJS.core}/node.manifest.json"
+        , "{PunyJS.core}/browser.manifest.json"
+        , "{PunyJS.ioc}/manifests/base.manifest.json"
     ]
 }

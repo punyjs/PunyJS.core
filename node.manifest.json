@@ -1,0 +1,25 @@
+{
+    "config": {
+        "engine": "node"
+    }
+    , "entries": [
+        {
+            "type": "${appType}"
+            , "name": "app-${config.engine}"
+            , "dtree": "base.dtree.json"
+        }
+        , {
+            "type": "test"
+            , "name": "test-package-${config.engine}"
+            , "units": {
+                "app": "app-${config.engine}"
+                , "controller": "node-ioc-controller"
+            }
+            , "config": {
+                "output": "PunyJS/core"
+                , "fileName": "${config.engine}.test.json"
+            }
+        }
+        , "{PunyJS.ioc}/manifests/node.manifest.json"
+    ]
+}
