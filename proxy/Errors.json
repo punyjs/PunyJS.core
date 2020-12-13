@@ -1,0 +1,9 @@
+{
+    "core": {
+        "proxy": {
+            "unable_to_set_event_property": "[Unable to Set Event Property] Event properties are read only"
+            , "unable_to_delete_event_property": "[Unable to Delete Event Property] Event properties are read only"
+            , "invalid_trap_name": "[Invalid Trap Name] The trap name given is not valid."
+        }
+    }
+}

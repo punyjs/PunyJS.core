@@ -1,0 +1,28 @@
+{
+    "proxy": ["+Proxy"]
+    , "reflect": ["+Reflect"]
+    , "defaults": [
+        ":PunyJS.core.proxy.Defaults"
+        , {"conflictResolution": "error"}
+    ]
+    , "errors": [
+        ":PunyJS.core.proxy.Errors"
+        , {"conflictResolution": "error"}
+    ]
+    , "is": [{
+        "object": [":PunyJS.core.is.Object"]
+        , "func": [":PunyJS.core.is.Func"]
+        , "nill": [":PunyJS.core.is.Nill"]
+        , "promise": [":PunyJS.core.is.Promise"]
+    }]
+    , "utils": [{
+        "copy": [":PunyJS.core.object.Copy"]
+        , "applyIf": [":PunyJS.core.object.ApplyIf"]
+        , "proxy": [{
+            "createWatcher": [":PunyJS.core.proxy._CreateWatcher", []]
+            , "watcher": [":PunyJS.core.proxy._Watcher", []]
+            , "biDirectionalWatcher": [":PunyJS.core.proxy._BiDirectionalWatcher", []]
+        }]
+    }]
+    , "eventEmitter": [":PunyJS.core.event._EventEmitter",[]]
+}

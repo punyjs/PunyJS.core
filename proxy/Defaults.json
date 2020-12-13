@@ -1,0 +1,15 @@
+{
+    "core": {
+        "proxy": {
+            "watcher": {
+                "traps": [
+                    "set"
+                ]
+                , "includeDetails": [
+                    "set"
+                ]
+                , "preserveTarget": false
+            }
+        }
+    }
+}
