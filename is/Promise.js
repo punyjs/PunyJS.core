@@ -5,5 +5,13 @@
 *   @returns {boolean}
 */
 function isPromise(v) {
-    return !!v && typeof v === "object" && (v instanceof Promise || Object.getPrototypeOf(v) === Promise || Promise.resolve(v) === v) || false;
+    return !!v
+        && typeof v === "object"
+        && (
+            v instanceof Promise
+            || Object.getPrototypeOf(v) === Promise
+            || Promise.resolve(v) === v
+        )
+        || false
+    ;
 }
