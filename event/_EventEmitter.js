@@ -7,53 +7,46 @@ function _EventEmitter(
     , is_func
     , is_nill
     , is_array
+    , utils_copy
 ) {
-
-    /**
-    * @constants
-    */
-    var cnsts = {
-        "maxErrorLength": 100
-    }
-    ;
 
     return EventEmitter;
 
     /**
     * @worker
     */
-    function EventEmitter(listeners = {}, errors = []) {
+    function EventEmitter(listeners = {}, prototype = Object.prototype) {
         if (!is_object(listeners)) {
             listeners = {};
-        }
-        if (!is_array(errors)) {
-            errors = [];
         }
         /**
         * @prototype
         */
-        return Object.create(null, {
-            "on": {
-                "enumerable": true
-                , "value": addListener.bind(null, listeners)
+        return Object.create(
+            prototype
+            , {
+                "on": {
+                    "enumerable": true
+                    , "value": addListener.bind(null, listeners)
+                }
+                , "once": {
+                    "enumerable": true
+                    , "value": once.bind(null, listeners)
+                }
+                , "off": {
+                    "enumerable": true
+                    , "value": removeListener.bind(null, listeners)
+                }
+                , "hasEventListener": {
+                    "enumerable": true
+                    , "value": hasEventListener.bind(null, listeners)
+                }
+                , "emit": {
+                    "enumerable": true
+                    , "value": fireEvent.bind(null, listeners)
+                }
             }
-            , "once": {
-                "enumerable": true
-                , "value": once.bind(null, listeners)
-            }
-            , "off": {
-                "enumerable": true
-                , "value": removeListener.bind(null, listeners)
-            }
-            , "emit": {
-                "enumerable": true
-                , "value": fireEvent.bind(null, listeners, errors)
-            }
-            , "errors": {
-                "enumerable": true
-                , "value": errors
-            }
-        });
+        );
     }
     /**
     * @function
@@ -120,6 +113,15 @@ function _EventEmitter(
     /**
     * @function
     */
+    function hasEventListener(listeners, eventName) {
+        if (!listeners.hasOwnProperty(eventName)) {
+            return false;
+        }
+        return true;
+    }
+    /**
+    * @function
+    */
     function getListenerIndex(eventName, callback) {
         return listeners[eventName]
         .findIndex(function findCbIndex(listener) {
@@ -129,87 +131,68 @@ function _EventEmitter(
     /**
     * @function
     */
-    function fireEvent(listeners, errors, eventName, details) {
-        try {
-            var eventListeners = listeners[eventName]
-            , runOnceIndexes = []
-            ;
-            if (is_nill(eventListeners) || eventListeners.length === 0) {
-                return false;
-            }
-            //loop through the listeners
-            eventListeners.forEach(
-                executeCallback.bind(null, runOnceIndexes, details, errors)
-            );
-            //remove any run once entries
-            runOnceIndexes.forEach(
-                function forEachRunOnceIndex(runOnceIndex) {
-                    eventListeners.splice(runOnceIndex, 1);
-                }
-            );
-
-            return true;
-        }
-        catch(ex) {
-            addError(errors, ex);
+    function fireEvent(listeners, eventName, details) {
+        var eventListeners = listeners[eventName]
+        , runOnceIndexes = []
+        ;
+        if (is_nill(eventListeners) || eventListeners.length === 0) {
             return false;
         }
+        //loop through the listeners
+        eventListeners.forEach(
+            executeCallback.bind(null, runOnceIndexes, details)
+        );
+        //remove any run once entries
+        runOnceIndexes.forEach(
+            function forEachRunOnceIndex(runOnceIndex) {
+                eventListeners.splice(runOnceIndex, 1);
+            }
+        );
+
+        return true;
     }
     /**
     * @function
     */
-    function executeCallback(runOnceIndexes, details, errors, listener, index) {
+    function executeCallback(runOnceIndexes, details, listener, index) {
         var options = listener.options
         , runAsync = details.runAsync === true
             ? true
             : !!options
                 && options.runAsync
                 || false
-        , passed
         ;
 
         if (runAsync) {
             executeCallbackAsyncronous(
                 listener
                 , details
-                , errors
             );
         }
         else {
-            passed = executeCallbackSyncronous(
+            executeCallbackSyncronous(
                 listener
                 , details
-                , errors
             );
         }
         //remove the listener for run once
         if (!!options && options.once === true) {
             runOnceIndexes.push(index);
         }
-
-        return passed;
     }
     /**
     * @function
     */
-    function executeCallbackSyncronous(listener, details, errors) {
-        try {
-            execute(
-                listener
-                , details
-            );
-
-            return true;
-        }
-        catch(ex) {
-            addError(errors, ex);
-            return false;
-        }
+    function executeCallbackSyncronous(listener, details) {
+        execute(
+            listener
+            , details
+        );
     }
     /**
     * @function
     */
-    function executeCallbackAsyncronous(listener, details, errors) {
+    function executeCallbackAsyncronous(listener, details) {
         promise
         .resolve()
         .then(function thenExecuteListener() {
@@ -220,7 +203,7 @@ function _EventEmitter(
                 );
             }
             catch(ex) {
-                addError(errors, ex);
+                return promise.reject(ex);
             }
         });
     }
@@ -229,22 +212,10 @@ function _EventEmitter(
     */
     function execute(listener, details) {
         if (is_object(details)) {
-            listener.callback(
-                Object.create(details) //create a new object for each event
-            );
+            listener.callback(details);
         }
         else {
             listener.callback(details);
-        }
-    }
-    /**
-    * @function
-    */
-    function addError(errors, ex) {
-        errors.push(ex);
-        //drop the first member if we've surpassed the max error length
-        if (errors.length > cnsts.maxErrorLength) {
-            errors.shift();
         }
     }
 }
