@@ -5,6 +5,7 @@ function _CreateWatcher(
     proxy
     , is_object
     , is_func
+    , is_symbol
     , utils_apply
     , utils_copy
     , errors
@@ -149,7 +150,7 @@ function _CreateWatcher(
         , receiver
     ) {
         //if this is an event property then return it
-        if (events.hasOwnProperty(propName)) {
+        if (propName in events) {
             return events[propName];
         }
         //see if we are including event details
@@ -204,7 +205,7 @@ function _CreateWatcher(
         , value
         , receiver
     ) {
-        if (events.hasOwnProperty(propName)) {
+        if (propName in events) {
             throw new Error(
                 `${errors.core.proxy.unable_to_set_event_property} (${propName})`
             );
@@ -258,7 +259,7 @@ function _CreateWatcher(
         , target
         , propName
     ) {
-        if (events.hasOwnProperty(propName)) {
+        if (propName in events) {
             throw new Error(
                 `${errors.core.proxy.unable_to_delete_event_property} (${propName})`
             );
@@ -392,6 +393,10 @@ function _CreateWatcher(
     * @function
     */
     function getFullKey(parentName, propName) {
+        //what to do with symbols
+        if (is_symbol(propName)) {
+            propName = propName.toString();
+        }
         return !!parentName
             ? `${parentName}.${propName}`
             : propName
@@ -433,6 +438,5 @@ function _CreateWatcher(
                 );
             }
         );
-
     }
 }
