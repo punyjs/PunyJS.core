@@ -4,9 +4,11 @@
             "watcher": {
                 "traps": [
                     "set"
+                    , "delete"
                 ]
                 , "includeDetails": [
                     "set"
+                    , "set"
                 ]
                 , "preserveTarget": false
             }

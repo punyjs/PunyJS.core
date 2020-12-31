@@ -22,7 +22,7 @@ function biDirectionalWatcherTest1(
                 [
                     ":PunyJS.core.proxy._BiDirectionalWatcher"
                     , [
-                        , utils_proxy_createWatcher
+                        utils_proxy_createWatcher
                     ]
                 ]
             );
@@ -42,7 +42,7 @@ function biDirectionalWatcherTest1(
 
     assert(
         function assert(test) {
-            test("The createWnatcher mock should be called twice")
+            test("The createWatcher mock should be called twice")
             .value(utils_proxy_createWatcher)
             .hasBeenCalled(2)
             ;

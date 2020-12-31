@@ -7,10 +7,7 @@
 * @factory
 */
 function _Watcher(
-    is_object
-    , utils_copy
-    , utils_applyIf
-    , utils_proxy_createWatcher
+    utils_proxy_createWatcher
     , eventEmitter
 ) {
 
@@ -20,12 +17,24 @@ function _Watcher(
     * @worker
     */
     function Watcher(target, options) {
-        //create the event emitter
-        var events = eventEmitter();
+        ///INPUT VALIDATION
+        if (!is_object(options)) {
+            options = {
+                "preserveTarget": !!options
+            };
+        }
+        ///END INPUT VALIDATION
+        //copy the target so no un-monitored changes can be made
+        var internalTarget = !options.preserveTarget
+            ? utils_deep(
+                target
+            )
+            : target
+        ;
 
         return utils_proxy_createWatcher(
             target
-            , events
+            , eventEmitter()
             , options
         );
     }

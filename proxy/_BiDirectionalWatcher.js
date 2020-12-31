@@ -3,10 +3,14 @@
 * @factory
 */
 function _BiDirectionalWatcher(
-    utils_copy
-    , utils_proxy_createWatcher
+    utils_proxy_createWatcher
+    , is_object
+    , utils_copy
+    , utils_apply
+    , utils_deep
     , eventEmitter
     , errors
+    , defaults
 ) {
 
     return BiDirectionalWatcher;
@@ -14,37 +18,49 @@ function _BiDirectionalWatcher(
     /**
     * @worker
     */
-    function BiDirectionalWatcher(externalTarget, options) {
-        var target = utils_copy(
-            externalTarget
-        )
-        , emitterA = eventEmitter()
+    function BiDirectionalWatcher(target, options) {
+        ///INPUT VALIDATION
+        if (!is_object(options)) {
+            options = {
+                "preserveTarget": !!options
+            };
+        }
+        ///END INPUT VALIDATION
+        //copy the target so no un-monitored changes can be made
+        var internalTarget = !options.preserveTarget
+            ? utils_deep(
+                target
+            )
+            : target
+        ;
+        //we need to keep the target preserved from here
+        options.preserveTarget = true;
+        //create the event emitters for both sides
+        var emitterA = eventEmitter()
         , emitterZ = eventEmitter()
-        , proxyAEvents = Object.create(
-            emitterA
-            , {
-                "emit": {
-                    "enumerable": true
-                    , "value": emitterZ.emit
-                }
-            }
-        )
-        , proxyZEvents = Object.create(
-            emitterZ
-            , {
-                "emit": {
-                    "enumerable": true
-                    , "value": emitterA.emit
-                }
-            }
-        )
+        //swap the event emitters between the sides
+        , proxyAEvents = {
+            "emit": emitterZ.emit
+            , "on": emitterA.on
+            , "once": emitterA.once
+            , "off": emitterA.off
+            , "has": emitterA.has
+        }
+        , proxyZEvents = {
+            "emit": emitterA.emit
+            , "on": emitterZ.on
+            , "once": emitterZ.once
+            , "off": emitterZ.off
+            , "has": emitterZ.has
+        }
+        //create the watchers for both sides
         , proxyA = utils_proxy_createWatcher(
-            target
+            internalTarget
             , proxyAEvents
             , options
         )
         , proxyZ = utils_proxy_createWatcher(
-            target
+            internalTarget
             , proxyZEvents
             , options
         )

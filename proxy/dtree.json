@@ -1,5 +1,6 @@
 {
     "proxy": ["+Proxy"]
+    , "promise": ["+Promise"]
     , "reflect": ["+Reflect"]
     , "defaults": [
         ":PunyJS.core.proxy.Defaults"
@@ -17,7 +18,9 @@
     }]
     , "utils": [{
         "copy": [":PunyJS.core.object.Copy"]
+        , "deep": [":PunyJS.core.object._Deep",[]]
         , "applyIf": [":PunyJS.core.object.ApplyIf"]
+        , "apply": [":PunyJS.core.object.Apply"]
         , "proxy": [{
             "createWatcher": [":PunyJS.core.proxy._CreateWatcher", []]
             , "watcher": [":PunyJS.core.proxy._Watcher", []]
