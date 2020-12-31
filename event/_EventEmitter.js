@@ -8,6 +8,7 @@ function _EventEmitter(
     , is_nill
     , is_array
     , utils_copy
+    , utils_clear
 ) {
 
     return EventEmitter;
@@ -67,6 +68,17 @@ function _EventEmitter(
     * @function
     */
     function addListener(listeners, eventName, callback, options) {
+        if (is_array(eventName)) {
+            for(let i = 0, l = eventName.length; i < l; i++) {
+                addListener(
+                    listeners
+                    , eventName[i]
+                    , callback
+                    , options
+                );
+            }
+            return;
+        }
         if (!listeners.hasOwnProperty(eventName)) {
             listeners[eventName] = [];
         }
@@ -81,11 +93,12 @@ function _EventEmitter(
     * @function
     */
     function removeListener(listeners, eventName, callback) {
+        //clear all of the listeners if there is no event name
         if (!eventName) {
-            ///TODO: clear the listeners rather than using a new object, we need to keep the reference
-            listeners = {};
+            utils_clear(listeners);
             return true;
         }
+        //if the event name doesn't exist, nothing to do
         if (!listeners.hasOwnProperty(eventName)) {
             return false;
         }
@@ -103,7 +116,7 @@ function _EventEmitter(
                 delete listeners[eventName];
             }
         }
-        //otherwise lets remove all of them
+        //otherwise lets remove all of them for this event name
         else {
             delete listeners[eventName];
         }
