@@ -75,7 +75,7 @@ function Reference(jpath, data) {
             //get a reference to the object; creating the paths
             value = reference(value, data).value;
         }
-        return "." + val;
+        return "." + value;
     }
     /**
     * @function
