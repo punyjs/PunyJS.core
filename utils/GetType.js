@@ -6,6 +6,12 @@
 *   @returns {string} The string value representing o's type
 */
 function getType(o) {
+    if (o === undefined) {
+        return "undefined";
+    }
+    else if (o === null) {
+        return "null";
+    }
     return Object.prototype.toString
         .call(o)
         .substring(8)
