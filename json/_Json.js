@@ -54,7 +54,9 @@ function _JSON(
                 ;
                 if (is_objectValue(value)) {
                     if (refs.has(value)) {
-                        value = {"$$ref$$": `${refs.get(value)}`};
+                        value = {
+                            "$$ref$$": `${refs.get(value)}`
+                        };
                     }
                     else {
                         path = `${parentPath}.${key}`;
@@ -68,7 +70,7 @@ function _JSON(
                 }
                 replacement[key] = value;
             }
-        )
+        );
 
         return replacement;
     }
