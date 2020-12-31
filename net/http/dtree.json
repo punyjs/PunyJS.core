@@ -33,6 +33,8 @@
         "http": [{
             "httpMessage": [":PunyJS.core.net.http._HttpMessage",[]]
             , "webSocket": [":PunyJS.core.net.http._WebSocket",[]]
+            , "webSocketServer": [":PunyJS.core.net.http._WebSocketServer",[]]
+            , "webSocketClient": [":PunyJS.core.net.http._WebSocketClient",[]]
             , "webSocketFrame": [":PunyJS.core.net.http._WebSocketFrame",[]]
             , "webSocketHandshake": [":PunyJS.core.net.http._WebSocketHandshake",[]]
             , "webSocketApi": [":PunyJS.core.net.http._WebSocketApi",[]]

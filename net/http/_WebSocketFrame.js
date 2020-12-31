@@ -282,13 +282,13 @@ function _Frame(
         //if the length code is 127 we are using 8 bytes
         if (lenCode === 127) {
             payloadLength = data.slice(2, 10)
-                .readBigInt64BE();
+                .readBigUInt64BE();
             maskingKeyOffset = 10;
         }
         //if the length code is 126 we are using 2 bytes
         else if (lenCode === 126) {
             payloadLength = data.slice(2, 4)
-                .readInt16BE();
+                .readUInt16BE();
             maskingKeyOffset = 4;
         }
         //else we are using the length code fof the length
