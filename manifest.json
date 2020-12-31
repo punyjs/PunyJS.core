@@ -12,6 +12,7 @@
 
     , "base": [
         "{PunyJS.core.proxy}/dtree.json"
+        , "{PunyJS.core.net.http}/dtree.json"
     ]
 
     , "entries": [

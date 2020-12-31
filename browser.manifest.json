@@ -7,6 +7,9 @@
             "type": "${appType}"
             , "name": "app-${config.engine}"
             , "dtree": "base.dtree.json"
+            , "base": [
+                "{PunyJS.core.net.http}/browser.dtree.json"
+            ]
         }
         , {
             "type": "test"

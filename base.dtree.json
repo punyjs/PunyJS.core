@@ -1,8 +1,11 @@
 {
     "performance": ["+performance"]
+    , "setTimeout": ["+setTimeout"]
+    , "clearTimeout": ["+clearTimeout"]
     , "process": ["+process"]
     , "promise": ["+Promise"]
     , "proxy": ["+Proxy"]
+    , "weakMap": ["+WeakMap"]
     , "errors": [
         ":PunyJS.core.data.Errors"
         , {"conflictResolution": "error"}
@@ -33,6 +36,7 @@
         , "protoOf": [":PunyJS.core.is.ProtoOf"]
         , "regExp": [":PunyJS.core.is.RegExp"]
         , "string": [":PunyJS.core.is.String"]
+        , "symbol": [":PunyJS.core.is.Symbol"]
     }]
     , "timing": [{
         "now": ["PunyJS.core.timing._Now",[]]
@@ -40,21 +44,24 @@
     }]
     , "utils": [{
         "copy": [":PunyJS.core.object.Copy"]
-        , "uuid": ["PunyJS.core.data._Uuid", []]
+        , "clear": [":PunyJS.core.object.Clear"]
+        , "uuid": [":PunyJS.core.data._uuid",[]]
         , "apply": [":PunyJS.core.object.Apply"]
         , "applyIf": [":PunyJS.core.object.ApplyIf"]
         , "lookup": [":PunyJS.core.object.Lookup"]
         , "reference": [":PunyJS.core.object.Reference"]
-        , "regex": [":PunyJS.core.regexp._RegExp"]
+        , "regex": [":PunyJS.core.regexp._RegExp",[]]
         , "merge": [":PunyJS.core.object.Merge"]
         , "update": [":PunyJS.core.object.Update"]
         , "ensure": [":PunyJS.core.object.Ensure"]
         , "watcher": [":PunyJS.core.object._Watcher"]
         , "func": [{
             "inspector": [":PunyJS.core.func._Inspector", []]
+            , "delay": [":PunyJS.core.func._Delay", []]
         }]
         , "json": [":PunyJS.core.json._Json",[]]
         , "decycleStringify": [".json", ".decycle"]
         , "retrocycleParse": [".json", ".retrocycle"]
+        , "deep": [":PunyJS.core.object._Deep",[]]
     }]
 }
