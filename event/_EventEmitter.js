@@ -105,7 +105,8 @@ function _EventEmitter(
         //if there is a callback then we are removing just the one listener
         if (is_func(callback)) {
             var index =  getListenerIndex(
-                eventName
+                listeners
+                , eventName
                 , callback
             );
             if (index !== -1) {
@@ -135,7 +136,7 @@ function _EventEmitter(
     /**
     * @function
     */
-    function getListenerIndex(eventName, callback) {
+    function getListenerIndex(listeners, eventName, callback) {
         return listeners[eventName]
         .findIndex(function findCbIndex(listener) {
             return listener.callback === callback;
