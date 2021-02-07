@@ -5,7 +5,7 @@
 function createWatcherTest1(
     controller
 ) {
-    var eventEmitter, createWatcher, events, target, watched, watched;
+    var eventEmitter, createWatcher, events, target, watched, watched, isWatched, result1, result2, proxy1, proxy2;
 
     arrange(
         async function arrange() {
@@ -14,6 +14,9 @@ function createWatcherTest1(
             );
             target = {
                 "property1": "value1"
+                , "property2": {
+
+                }
             }
             , events = eventEmitter()
             ;
@@ -31,6 +34,10 @@ function createWatcherTest1(
                 , events
             );
             watched.property1 = "update1";
+            proxy1 = watched.property2;
+            proxy2 = watched.property2;
+            result1 = createWatcher.isWatched(watched);
+            result2 = createWatcher.isWatched(target);
         }
     );
 
@@ -42,11 +49,32 @@ function createWatcherTest1(
             .hasProperty("property1")
             ;
 
-            test("watched should have the event properties")
-            .value(watched)
-            .hasProperty("on")
-            .hasProperty("off")
-            .hasProperty("emit")
+            test("watched should have the on event property")
+            .value(watched.on)
+            .isOfType("function")
+            ;
+            test("watched should have the off event property")
+            .value(watched.off)
+            .isOfType("function")
+            ;
+            test("watched should have the emit event property")
+            .value(watched.emit)
+            .isOfType("function")
+            ;
+
+            test("The first isWatched result should be true")
+            .value(result1)
+            .isTrue()
+            ;
+
+            test("The second isWatched result should be false")
+            .value(result2)
+            .isFalse()
+            ;
+
+            test("proxy1 should be proxy2")
+            .value(proxy1)
+            .equals(proxy2)
             ;
         }
     );
@@ -120,88 +148,9 @@ function createWatcherTest2(
 }
 /**
 * @test
-*   @title PunyJS.core.object._CreateWatcher: get trap, no details
-*/
-function createWatcherTest3(
-    controller
-    , mock_callback
-) {
-    var eventEmitter, createWatcher, events, target, watched, watched
-    , cb = mock_callback();
-
-    arrange(
-        async function arrange() {
-            eventEmitter = await controller(
-                [":PunyJS.core.event._EventEmitter", []]
-            );
-            target = {
-                "property1": "value1"
-                , "sub": {
-                    "property2": "value2"
-                }
-            }
-            , events = eventEmitter()
-            ;
-
-            createWatcher = await controller(
-                [":PunyJS.core.proxy._CreateWatcher", []]
-            );
-        }
-    );
-
-    act(
-        function act() {
-            watched = createWatcher(
-                target
-                , events
-                , {
-                    "traps": [
-                        "get"
-                    ]
-                    , "includeDetails": []
-                }
-            );
-            //get listeners
-            watched.on("get property1", cb);
-            watched.on("get sub.property2", cb);
-            //set listeners, should not be called
-            watched.on("property1", cb);
-            watched.on("sub.property2", cb);
-            watched.property1;
-            watched.sub.property2;
-            watched.property1 = "update1";
-            watched.sub.property2 = "update2";
-        }
-    );
-
-    assert(
-        function assert(test) {
-            test("The callback sould be called twice")
-            .value(cb)
-            .hasBeenCalled(2)
-            ;
-
-            test("The first call to callback should be")
-            .value(cb)
-            .getCallbackArg(0, 0)
-            .stringify()
-            .equals('"property1"')
-            ;
-
-            test("The second call to callback should be")
-            .value(cb)
-            .getCallbackArg(1, 0)
-            .stringify()
-            .equals('"sub.property2"')
-            ;
-        }
-    );
-}
-/**
-* @test
 *   @title PunyJS.core.object._CreateWatcher: delete trap, include detail
 */
-function createWatcherTest4(
+function createWatcherTest3(
     controller
     , mock_callback
 ) {
@@ -277,7 +226,7 @@ function createWatcherTest4(
 * @test
 *   @title PunyJS.core.object._CreateWatcher: apply trap, include detail
 */
-function createWatcherTest5(
+function createWatcherTest4(
     controller
     , mock_callback
 ) {
@@ -342,7 +291,7 @@ function createWatcherTest5(
 * @test
 *   @title PunyJS.core.object._CreateWatcher: construct trap, include detail
 */
-function createWatcherTest6(
+function createWatcherTest5(
     controller
     , mock_callback
 ) {
@@ -409,7 +358,7 @@ function createWatcherTest6(
 * @test
 *   @title PunyJS.core.object._CreateWatcher: preserveTarget true
 */
-function createWatcherTest7(
+function createWatcherTest6(
     controller
     , mock_callback
 ) {
@@ -456,7 +405,7 @@ function createWatcherTest7(
 * @test
 *   @title PunyJS.core.object._CreateWatcher: wildcard
 */
-function createWatcherTest8(
+function createWatcherTest7(
     controller
     , mock_callback
 ) {
@@ -535,7 +484,7 @@ function createWatcherTest8(
 * @test
 *   @title PunyJS.core.object._CreateWatcher: listeners added to child
 */
-function createWatcherTest9(
+function createWatcherTest8(
     controller
     , mock_callback
 ) {
@@ -593,7 +542,7 @@ function createWatcherTest9(
 * @test
 *   @title PunyJS.core.object._CreateWatcher: using arrays
 */
-function createWatcherTest10(
+function createWatcherTest9(
     controller
     , mock_callback
 ) {
@@ -649,14 +598,16 @@ function createWatcherTest10(
             watched.sub1.length = 3;
             //delete a member, but no removal
             delete watched.sub1[0];
+            //replace a member
+            watched.sub1[2] = "replaced member";
         }
     );
 
     assert(
         function assert(test) {
-            test("The callback should be called 12 times")
+            test("The callback should be called 6x")
             .value(cb1)
-            .hasBeenCalled(5)
+            .hasBeenCalled(6)
             ;
 
             test("The 1st callback should be called with")
@@ -684,20 +635,27 @@ function createWatcherTest10(
             .value(cb1)
             .getCallbackArg(3, 0)
             .stringify()
-            .equals('{"action":"delete","key":"sub1.3","oldValue":"new member","miss":false}')
+            .equals('{"action":"delete","key":"sub1.3","oldValue":"new member","arrayAction":"delete","miss":false}')
             ;
 
             test("The 5th callback should be called with")
             .value(cb1)
             .getCallbackArg(4, 0)
             .stringify()
-            .equals('{"action":"delete","key":"sub1.0","oldValue":"member2","miss":false}')
+            .equals('{"action":"set","key":"sub1.0","value":null,"oldValue":"member2","arrayAction":"replace","miss":false}')
+            ;
+
+            test("The 6th callback should be called with")
+            .value(cb1)
+            .getCallbackArg(5, 0)
+            .stringify()
+            .equals('{"action":"set","key":"sub1.2","value":"replaced member","oldValue":["member3",{"prop3":"value3"}],"arrayAction":"replace","miss":false}')
             ;
 
             test("The target should be")
             .value(target)
             .stringify()
-            .equals('{"prop1":"value1","sub1":[null,"inserted member",["member3",{"prop3":"value3"}]]}')
+            .equals('{"prop1":"value1","sub1":[null,"inserted member","replaced member"]}')
             ;
         }
     );

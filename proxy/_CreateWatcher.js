@@ -10,6 +10,7 @@ function _CreateWatcher(
     , is_symbol
     , is_array
     , is_numeric
+    , is_string
     , utils_apply
     , utils_copy
     , utils_deep
@@ -25,7 +26,12 @@ function _CreateWatcher(
         , "construct": constructTrap
     }
     , arrayChangeMap = new weakMap()
+    , arrayOpMap = new weakMap()
+    , proxyMap = new weakMap()
     ;
+
+    //add the type check
+    CreateWatcher.isWatched = isWatched;
 
     return CreateWatcher;
 
@@ -81,18 +87,6 @@ function _CreateWatcher(
                 , events
                 , parentName
             )
-            , "has": hasTrap.bind(
-                null
-                , options
-                , events
-                , parentName
-            )
-            , "ownKeys": ownKeysTrap.bind(
-                null
-                , options
-                , events
-                , parentName
-            )
         };
 
         options.traps
@@ -130,55 +124,59 @@ function _CreateWatcher(
         , propName
         , receiver
     ) {
+        //if this is the watched identifier
+        if (propName === "$$isWatched$$") {
+            return true;
+        }
         //if this is an event property then return it
         if (events.hasOwnProperty(propName)) {
             //append the namespaces
             return function eventWrap(...args) {
-                args[0] = appendParentNamespace(
-                    parentName
-                    , args[0]
-                );
+                if (!!parentName && !!args[0]) {
+                    args[0] = appendParentNamespace(
+                        parentName
+                        , args[0]
+                    );
+                }
                 events[propName].apply(null, args);
             };
         }
-        //see if we are including event details
-        var includeDetails = options.includeDetails.indexOf("get") !== -1
-        //see if we have a property to get, we don't care if it's on a prototype
-        , hasProp = includeDetails && propName in target
         //get the value
-        , value = target[propName]
-        , details
+        var value = target[propName]
         , fullKey = getFullKey(parentName, propName)
+        , valueProxy
         ;
-        //if this is part of the traps list
-        if (options.traps.indexOf("get") !== -1) {
-            //see if we are including details
-            if (includeDetails) {
-                details = {
-                    "action": "get"
-                    , "key": fullKey
-                    , "value": value
-                    , "miss": !hasProp
-                };
-            }
-            //fire any events
-            fireListeners(
-                events
-                , "get"
-                , fullKey
-                , details || fullKey
-            );
+        //if the target is an array and the prop is a prototype function
+        if (
+            is_array(target)
+            && Object.getPrototypeOf(target) === Array.prototype
+            && ["push","splice"].indexOf(propName) !== -1
+        ) {
+            //store the function name for subsequent processing
+            arrayOpMap.set(target, propName);
         }
-        //if the value is an object or function then create a proxy
+        //if the value is an object or function
         if (is_objectValue(value) || is_func(value)) {
-            //but only for owned properties, to leave the prototype stuff alone
+            //if the value is already a proxy then return it
+            if (value.$$isWatched$$ === true) {
+                return value;
+            }
+            //otherwise create a proxy but only for owned properties, to leave the prototype stuff alone
             if (target.hasOwnProperty(propName)) {
-                return createProxy(
-                    value
-                    , options
-                    , events
-                    , fullKey
-                );
+                valueProxy = proxyMap.get(value);
+                if (!valueProxy) {
+                    valueProxy = createProxy(
+                        value
+                        , options
+                        , events
+                        , fullKey
+                    );
+                    proxyMap.set(
+                        value
+                        , valueProxy
+                    );
+                }
+                return valueProxy;
             }
         }
         //all others
@@ -216,6 +214,12 @@ function _CreateWatcher(
         )
         , details
         ;
+        //remove any proxies from the map
+        if (is_objectValue(oldValue) || is_func(oldValue)) {
+            if (proxyMap.has(oldValue)) {
+                proxyMap.delete(oldValue);
+            }
+        }
         //handle arrays seperately
         if (is_array(target) && options.traps.indexOf("set") !== -1) {
             return handleSetArray(
@@ -275,7 +279,6 @@ function _CreateWatcher(
         //handle arrays seperately
         if (
             is_array(target)
-            && !!arrayChangeMap.get(target)
             && options.traps.indexOf("delete") !== -1
         ) {
             return handleDeleteArray(
@@ -289,12 +292,18 @@ function _CreateWatcher(
         //see if we are including event details
         var includeDetails = options.includeDetails.indexOf("delete") !== -1
         //  and if we are get the value before it's deleted
-        , value = includeDetails && target[propName]
+        , value = target[propName]
         //delete the property
         , deleted = delete target[propName]
         , fullKey = getFullKey(parentName, propName)
         , details
         ;
+        //remove any proxies from the map
+        if (is_objectValue(value) || is_func(value)) {
+            if (proxyMap.has(value)) {
+                proxyMap.delete(value);
+            }
+        }
         //if this is part of the traps list
         if (options.traps.indexOf("delete") !== -1) {
             //see if we are including details
@@ -390,35 +399,6 @@ function _CreateWatcher(
             args
         );
     }
-    /**
-    * Handles the in operator, including the event properties
-    * @function
-    */
-    function hasTrap(options, events, parentName, target, propName) {
-        return events.hasOwnProperty(propName)
-            || propName in target
-        ;
-    }
-    /**
-    * Handles getOwnPropertyNames and getOwnPropertySymbols for the target and adds the event properties
-    * @function
-    */
-    function ownKeysTrap(options, events, parentName, target) {
-        var eventProps = Object.getOwnPropertyNames(events)
-        , targetProps = Object.getOwnPropertyNames(target)
-        , targetSymbolProps = Object.getOwnPropertySymbols(target)
-        , combined = targetProps
-            .concat(targetSymbolProps)
-        ;
-
-        for(let i = 0, l = eventProps.length; i < l; i++) {
-            if (combined.indexOf(eventProps[i]) === -1) {
-                combined.push(eventProps[i]);
-            }
-        }
-
-        return combined;
-    }
 
     /**
     * Appends the parent name to the prop name if exists
@@ -508,9 +488,13 @@ function _CreateWatcher(
         , oldValue
         , hasProp
     ) {
-        var changeList = arrayChangeMap.get(target);
+        var changeList = arrayChangeMap.get(target)
+        , op = arrayOpMap.get(target)
+        ;
         //if this is not a length change then it is part of a change cycle
         if (propName !== 'length') {
+            //set the value
+            target[propName] = value;
             //if there isn't a change list, this is the start of a cycle
             if (!changeList) {
                 arrayChangeMap.set(target, (changeList = []));
@@ -528,6 +512,17 @@ function _CreateWatcher(
                     , "miss": !hasProp
                 }
             );
+            //if there isn't an operation then process the update immediately
+            if (!op) {
+                arrayChangeMap.delete(target);
+                processArrayChangeCycle(
+                    options
+                    , events
+                    , parentName
+                    , target
+                    , changeList
+                );
+            }
         }
         //if there isn't a change list then this is just an array length update
         else if (!changeList) {
@@ -540,11 +535,14 @@ function _CreateWatcher(
                 , value
                 , oldValue
             );
+            //set the value
+            target[propName] = value;
         }
         //otherwise this is the end of a change cycle
         else {
             //remove the array change map for this target
             arrayChangeMap.delete(target);
+            arrayOpMap.delete(target);
             processArrayChangeCycle(
                 options
                 , events
@@ -552,10 +550,9 @@ function _CreateWatcher(
                 , target
                 , changeList
             );
+            //set the value
+            target[propName] = value;
         }
-
-        //set the value
-        target[propName] = value;
 
         return true;
     }
@@ -590,6 +587,7 @@ function _CreateWatcher(
                         "action": "delete"
                         , "key": fullKey
                         , "oldValue": target[oldLength]
+                        , "arrayAction": "delete"
                         , "miss": !target[oldLength]
                     };
                 }
@@ -617,15 +615,42 @@ function _CreateWatcher(
         , fullkey = getFullKey(
             parentName
             , propName
-        );
-        //add a change record to the list
-        changeList.push(
-            {
-                "action": "delete"
-                , "key": fullkey
-                , "oldValue": target[propName]
-            }
-        );
+        )
+        , oldValue
+        ;
+        //if there isn't a change list then this is a replace of a current member with null
+        if (!changeList) {
+            oldValue = target[propName];
+            target[propName] = null;
+            processArrayChangeCycle(
+                options
+                , events
+                , parentName
+                , target
+                , [
+                    {
+                        "action": "set"
+                        , "key": fullkey
+                        , "oldValue": oldValue
+                        , "value": null
+                        , "miss": false
+                    }
+                ]
+            );
+        }
+        else {
+            delete target[propName];
+            //add a change record to the list and wait for length change
+            changeList.push(
+                {
+                    "action": "delete"
+                    , "key": fullkey
+                    , "oldValue": target[propName]
+                    , "miss": false
+                }
+            );
+        }
+
         return true;
     }
     /**
@@ -660,13 +685,20 @@ function _CreateWatcher(
             action = arrayAction = "delete";
             miss = false;
         }
-        //if there is only one entry then this is an append
+        //if there is only one entry then this is an append or replace
         else if (changeList.length === 1) {
             fullKey = firstEntry.key;
             value = firstEntry.value;
             action = "set";
-            arrayAction = "append";
-            miss = true;
+            if (firstEntry.miss) {
+                arrayAction = "append";
+                miss = true;
+            }
+            else {
+                arrayAction = "replace";
+                miss = false;
+                oldValue = firstEntry.oldValue;
+            }
         }
         //otherwise this is an insert operation
         else {
@@ -697,5 +729,15 @@ function _CreateWatcher(
             , fullKey
             , details || fullKey
         );
+    }
+
+    /**
+    * @function
+    */
+    function isWatched(value) {
+        if (is_objectValue(value) || is_func(value)) {
+            return value.$$isWatched$$ === true;
+        }
+        return false;
     }
 }
