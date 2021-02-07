@@ -25,6 +25,7 @@
             "createWatcher": [":PunyJS.core.proxy._CreateWatcher", []]
             , "watcher": [":PunyJS.core.proxy._Watcher", []]
             , "biDirectionalWatcher": [":PunyJS.core.proxy._BiDirectionalWatcher", []]
+            , "isWatched": [".createWatcher", ".isWatched"]
         }]
     }]
     , "eventEmitter": [":PunyJS.core.event._EventEmitter",[]]
