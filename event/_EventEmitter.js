@@ -28,7 +28,7 @@ function _EventEmitter(
             , {
                 "on": {
                     "enumerable": true
-                    , "value": addListener.bind(null, listeners)
+                    , "value": addListeners.bind(null, listeners)
                 }
                 , "once": {
                     "enumerable": true
@@ -67,18 +67,32 @@ function _EventEmitter(
     /**
     * @function
     */
-    function addListener(listeners, eventName, callback, options) {
-        if (is_array(eventName)) {
-            for(let i = 0, l = eventName.length; i < l; i++) {
+    function addListeners(eventNames) {
+        //if this is a single event name then process it
+        if (is_array(eventNames)) {
+            addListener(
+                listeners
+                , eventNames
+                , callback
+                , options
+            );
+        }
+        //otherwise, process each in the array
+        else {
+            for(let i = 0, l = eventNames.length; i < l; i++) {
                 addListener(
                     listeners
-                    , eventName[i]
+                    , eventNames[i]
                     , callback
                     , options
                 );
             }
-            return;
         }
+    }
+    /**
+    * @function
+    */
+    function addListener(listeners, eventName, callback, options) {
         if (!listeners.hasOwnProperty(eventName)) {
             listeners[eventName] = [];
         }
