@@ -35,23 +35,26 @@ function _BiDirectionalWatcher(
         ;
         //we need to keep the target preserved from here
         options.preserveTarget = true;
+
         //create the event emitters for both sides
         var emitterA = eventEmitter()
         , emitterZ = eventEmitter()
         //swap the event emitters between the sides
         , proxyAEvents = {
-            "emit": emitterZ.emit
+            "emitterId": emitterZ.emitterId
+            , "emit": emitterZ.emit
             , "on": emitterA.on
             , "once": emitterA.once
             , "off": emitterA.off
-            , "has": emitterA.has
+            , "hasEventListener": emitterA.hasEventListener
         }
         , proxyZEvents = {
-            "emit": emitterA.emit
+            "emitterId": emitterA.emitterId
+            , "emit": emitterA.emit
             , "on": emitterZ.on
             , "once": emitterZ.once
             , "off": emitterZ.off
-            , "has": emitterZ.has
+            , "hasEventListener": emitterZ.hasEventListener
         }
         //create the watchers for both sides
         , proxyA = utils_proxy_createWatcher(

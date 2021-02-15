@@ -59,3 +59,69 @@ function biDirectionalWatcherTest1(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.core.proxy._BiDirectionalWatcher: functional test
+*/
+function biDirectionalWatcherTest2(
+    controller
+    , mock_callback
+) {
+    var watcher, target, proxyA, proxyZ, callbackA, callbackZ;
+
+    arrange(
+        async function arrange() {
+            watcher = await controller(
+                [
+                    ":PunyJS.core.proxy._BiDirectionalWatcher"
+                    , [
+
+                    ]
+                ]
+            );
+            target = {
+
+            };
+            callbackA = mock_callback();
+            callbackZ = mock_callback();
+        }
+    );
+
+    act(
+        function act() {
+            [proxyA, proxyZ] = watcher(
+                target
+            );
+            proxyA.on(
+                "*"
+                , callbackA
+            );
+            proxyZ.on(
+                "*"
+                , callbackZ
+            );
+            proxyA.newprop = "new value 1";
+            proxyZ.newprop = "new value 2";
+        }
+    );
+
+    assert(
+        function assert(test) {
+            test("callbackA should be called")
+            .value(callbackA)
+            .hasBeenCalled(1)
+            .getCallbackArg(0, 0)
+            .stringify()
+            .equals('{"action":"set","key":"newprop","value":"new value 2","oldValue":"new value 1","miss":false}')
+            ;
+
+            test("callbackZ should be called")
+            .value(callbackZ)
+            .hasBeenCalled(1)
+            .getCallbackArg(0, 0)
+            .stringify()
+            .equals('{"action":"set","key":"newprop","value":"new value 1","miss":true}')
+            ;
+        }
+    );
+}
