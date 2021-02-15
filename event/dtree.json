@@ -1,0 +1,27 @@
+{
+    "promise": ["+Promise"]
+    , "is": [{
+        "nill": [":PunyJS.core.is.Nill"]
+        , "object": [":PunyJS.core.is.Object"]
+        , "func": [":PunyJS.core.is.Func"]
+        , "array": [":PunyJS.core.is.Array"]
+    }]
+    , "utils": [{
+        "clear": [":PunyJS.core.object.Clear"]
+        , "copy": [":PunyJS.core.object.Copy"]
+        , "uuid": [":PunyJS.core.data._Uuid",[]]
+    }]
+    , "timing": [{
+        "gregorianReform": ["+Date.UTC('1582', '9', '15', '0', '0', '0', '0')"]
+        , "timestamper": [":PunyJS.core.timing._Timestamper",[]]
+    }]
+    , "security": [{
+        "crypto": [":PunyJS.core.security._Crypto", []]
+        , "fillRandomBytesSync": [".security.crypto",".fillRandomBytesSync"]
+    }]
+    , "infos": [
+        ":PunyJS.core.event.Infos"
+        , {"conflictResolution":"error"}
+    ]
+    , "eventEmitter": [":PunyJS.core.event._EventEmitter",[]]
+}

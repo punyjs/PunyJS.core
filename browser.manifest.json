@@ -9,6 +9,7 @@
             , "dtree": "base.dtree.json"
             , "base": [
                 "{PunyJS.core.net.http}/browser.dtree.json"
+                , "{PunyJS.core.security}/browser.dtree.json"
             ]
         }
         , {

@@ -11,7 +11,11 @@
     , "appType": "ioc.${iocType}"
 
     , "base": [
-        "{PunyJS.core.proxy}/dtree.json"
+        "{PunyJS.core}/base.dtree.json"
+        , "{PunyJS.core.data}/uuid.dtree.json"
+        , "{PunyJS.core.security}/dtree.json"
+        , "{PunyJS.core.proxy}/dtree.json"
+        , "{PunyJS.core.event}/dtree.json"
         , "{PunyJS.core.net.http}/dtree.json"
     ]
 

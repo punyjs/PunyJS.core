@@ -38,14 +38,10 @@
         , "string": [":PunyJS.core.is.String"]
         , "symbol": [":PunyJS.core.is.Symbol"]
     }]
-    , "timing": [{
-        "now": ["PunyJS.core.timing._Now",[]]
-        , "gregorianReform": ["+Date.UTC('1582', '9', '15', '0', '0', '0', '0')"]
-    }]
     , "utils": [{
         "copy": [":PunyJS.core.object.Copy"]
         , "clear": [":PunyJS.core.object.Clear"]
-        , "uuid": [":PunyJS.core.data._uuid",[]]
+        , "uuid": [":PunyJS.core.data._Uuid",[]]
         , "apply": [":PunyJS.core.object.Apply"]
         , "applyIf": [":PunyJS.core.object.ApplyIf"]
         , "lookup": [":PunyJS.core.object.Lookup"]

@@ -10,6 +10,10 @@
         ":PunyJS.core.proxy.Errors"
         , {"conflictResolution": "error"}
     ]
+    , "infos": [
+        ":PunyJS.core.proxy.Infos"
+        , {"conflictResolution": "error"}
+    ]
     , "is": [{
         "object": [":PunyJS.core.is.Object"]
         , "func": [":PunyJS.core.is.Func"]
@@ -21,6 +25,7 @@
         , "deep": [":PunyJS.core.object._Deep",[]]
         , "applyIf": [":PunyJS.core.object.ApplyIf"]
         , "apply": [":PunyJS.core.object.Apply"]
+        , "uuid": [":PunyJS.core.data._Uuid",[]]
         , "proxy": [{
             "createWatcher": [":PunyJS.core.proxy._CreateWatcher", []]
             , "watcher": [":PunyJS.core.proxy._Watcher", []]

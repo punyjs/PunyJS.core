@@ -1,6 +1,11 @@
 {
     "promise": ["+Promise"]
+    , "timing": [{
+        "gregorianReform": ["+Date.UTC('1582', '9', '15', '0', '0', '0', '0')"]
+        , "timestamper": [":PunyJS.core.timing._Timestamper",[]]
+    }]
     , "security": [{
         "crypto": [":PunyJS.core.security._Crypto", []]
+        , "fillRandomBytesSync": [".security.crypto",".fillRandomBytesSync"]
     }]
 }
