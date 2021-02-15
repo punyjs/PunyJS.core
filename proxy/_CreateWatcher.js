@@ -14,8 +14,10 @@ function _CreateWatcher(
     , utils_apply
     , utils_copy
     , utils_deep
+    , reporter
     , errors
     , defaults
+    , infos
 ) {
     /**
     * A map of additional trap handlers that could be added
@@ -25,9 +27,6 @@ function _CreateWatcher(
         "apply": applyTrap
         , "construct": constructTrap
     }
-    , arrayChangeMap = new weakMap()
-    , arrayOpMap = new weakMap()
-    , proxyMap = new weakMap()
     ;
 
     //add the type check
@@ -38,11 +37,17 @@ function _CreateWatcher(
     /**
     * @worker
     */
-    function CreateWatcher(target, events, options = false) {
+    function CreateWatcher(target, events, options) {
         options = utils_apply(
             options
             , utils_copy(defaults.core.proxy.watcher)
         );
+
+        //create weak maps for the specific watcher
+        options.proxyMap = new weakMap();
+        options.arrayChangeMap = new weakMap();
+        options.arrayOpMap = new weakMap();
+
         return createProxy(
             target
             , options
@@ -130,16 +135,21 @@ function _CreateWatcher(
         }
         //if this is an event property then return it
         if (events.hasOwnProperty(propName)) {
-            //append the namespaces
-            return function eventWrap(...args) {
-                if (!!parentName && !!args[0]) {
-                    args[0] = appendParentNamespace(
-                        parentName
-                        , args[0]
-                    );
-                }
-                events[propName].apply(null, args);
-            };
+            //if the property is a function, we need to add the parent namespace
+            if (is_func(events[propName])) {
+                //inject a func to append the namespaces
+                return function eventWrap(...args) {
+                    if (!!parentName && !!args[0]) {
+                        args[0] = appendParentNamespace(
+                            parentName
+                            , args[0]
+                        );
+                    }
+                    events[propName].apply(null, args);
+                };
+            }
+            //otherwise return the value
+            return events[propName];
         }
         //get the value
         var value = target[propName]
@@ -153,7 +163,7 @@ function _CreateWatcher(
             && ["push","splice"].indexOf(propName) !== -1
         ) {
             //store the function name for subsequent processing
-            arrayOpMap.set(target, propName);
+            options.arrayOpMap.set(target, propName);
         }
         //if the value is an object or function
         if (is_objectValue(value) || is_func(value)) {
@@ -163,7 +173,7 @@ function _CreateWatcher(
             }
             //otherwise create a proxy but only for owned properties, to leave the prototype stuff alone
             if (target.hasOwnProperty(propName)) {
-                valueProxy = proxyMap.get(value);
+                valueProxy = options.proxyMap.get(value);
                 if (!valueProxy) {
                     valueProxy = createProxy(
                         value
@@ -171,7 +181,7 @@ function _CreateWatcher(
                         , events
                         , fullKey
                     );
-                    proxyMap.set(
+                    options.proxyMap.set(
                         value
                         , valueProxy
                     );
@@ -201,6 +211,7 @@ function _CreateWatcher(
                 `${errors.core.proxy.unable_to_set_event_property} (${propName})`
             );
         }
+
         //see if we are including event details
         var includeDetails = options.includeDetails.indexOf("set") !== -1
         //see if the property exists
@@ -214,10 +225,15 @@ function _CreateWatcher(
         )
         , details
         ;
+        ///LOGGING
+        reporter.extended(
+            `${infos.proxy.set_trap_called} (${fullKey}, emitterId:${events.emitterId})`
+        );
+        ///END LOGGING
         //remove any proxies from the map
         if (is_objectValue(oldValue) || is_func(oldValue)) {
-            if (proxyMap.has(oldValue)) {
-                proxyMap.delete(oldValue);
+            if (options.proxyMap.has(oldValue)) {
+                options.proxyMap.delete(oldValue);
             }
         }
         //handle arrays seperately
@@ -298,10 +314,15 @@ function _CreateWatcher(
         , fullKey = getFullKey(parentName, propName)
         , details
         ;
+        ///LOGGING
+        reporter.extended(
+            `${infos.proxy.delete_trap_called} (${fullKey}, emitterId:${events.emitterId})`
+        );
+        ///END LOGGING
         //remove any proxies from the map
         if (is_objectValue(value) || is_func(value)) {
-            if (proxyMap.has(value)) {
-                proxyMap.delete(value);
+            if (options.proxyMap.has(value)) {
+                options.proxyMap.delete(value);
             }
         }
         //if this is part of the traps list
@@ -342,6 +363,11 @@ function _CreateWatcher(
         , fullKey = parentName
         , details
         ;
+        ///LOGGING
+        reporter.extended(
+            `${infos.proxy.apply_trap_called} (${fullKey}, emitterId:${events.emitterId})`
+        );
+        ///END LOGGING
         //if this is part of the traps list
         if (options.traps.indexOf("apply") !== -1) {
             //see if we are including details
@@ -376,6 +402,11 @@ function _CreateWatcher(
         , fullKey = parentName
         , details
         ;
+        ///LOGGING
+        reporter.extended(
+            `${infos.proxy.construct_trap_called} (${fullKey}, emitterId:${events.emitterId})`
+        );
+        ///END LOGGING
         //if this is part of the traps list
         if (options.traps.indexOf("construct") !== -1) {
             //see if we are including details
@@ -488,8 +519,8 @@ function _CreateWatcher(
         , oldValue
         , hasProp
     ) {
-        var changeList = arrayChangeMap.get(target)
-        , op = arrayOpMap.get(target)
+        var changeList = options.arrayChangeMap.get(target)
+        , op = options.arrayOpMap.get(target)
         ;
         //if this is not a length change then it is part of a change cycle
         if (propName !== 'length') {
@@ -497,7 +528,7 @@ function _CreateWatcher(
             target[propName] = value;
             //if there isn't a change list, this is the start of a cycle
             if (!changeList) {
-                arrayChangeMap.set(target, (changeList = []));
+                options.arrayChangeMap.set(target, (changeList = []));
             }
             //add a change record to the list
             changeList.push(
@@ -514,7 +545,7 @@ function _CreateWatcher(
             );
             //if there isn't an operation then process the update immediately
             if (!op) {
-                arrayChangeMap.delete(target);
+                options.arrayChangeMap.delete(target);
                 processArrayChangeCycle(
                     options
                     , events
@@ -541,8 +572,8 @@ function _CreateWatcher(
         //otherwise this is the end of a change cycle
         else {
             //remove the array change map for this target
-            arrayChangeMap.delete(target);
-            arrayOpMap.delete(target);
+            options.arrayChangeMap.delete(target);
+            options.arrayOpMap.delete(target);
             processArrayChangeCycle(
                 options
                 , events
@@ -611,7 +642,7 @@ function _CreateWatcher(
         , target
         , propName
     ) {
-        var changeList = arrayChangeMap.get(target)
+        var changeList = options.arrayChangeMap.get(target)
         , fullkey = getFullKey(
             parentName
             , propName
