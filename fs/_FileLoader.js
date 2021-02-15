@@ -16,25 +16,38 @@ function _FileLoader(
         if (!options) {
             options = "utf8";
         }
+
         //start a promise
         return new promise(function thenReadFile(resolve, reject) {
-            //start the read process
-            node_fs.readFile(
-                node_path.resolve(path)
-                , options
-                , function readFileCb(err, data) {
-                    try {
-                        if (!err) {
-                            resolve(data);
-                            return;
-                        }
-                    }
-                    catch(ex) {
-                        err = ex;
-                    }
-                    reject(err);
+            try {
+                var resolvedPath = node_path.resolve(path);
+                //start the read process
+                if (options === "raw") {
+                    node_fs.readFile(
+                        resolvedPath
+                        , readFileCb
+                    );
                 }
-            );
+                else {
+                    node_fs.readFile(
+                        resolvedPath
+                        , options
+                        , readFileCb
+                    );
+                }
+
+                function readFileCb(err, data) {
+                    if (!err) {
+                        resolve(data);
+                    }
+                    else {
+                        reject(err);
+                    }
+                }
+            }
+            catch(ex) {
+                reject(ex);
+            }
         });
     };
 }
