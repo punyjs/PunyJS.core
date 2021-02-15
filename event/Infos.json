@@ -1,0 +1,7 @@
+{
+    "event": {
+        "listener_added": "[Listener Added] A listener has been added to the event emitter"
+        , "listener_removed": "[Listener Removed] A listener has been removed from the event emitter"
+        , "event_emitted": "[Event Emitted] An event has been emitted from the event emitter"
+    }
+}

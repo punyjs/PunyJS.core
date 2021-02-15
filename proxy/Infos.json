@@ -1,0 +1,8 @@
+{
+    "proxy": {
+        "set_trap_called": "[Set Trap Called] The watcher set trap has been called"
+        , "delete_trap_called": "[Delete Trap Called] The watcher delete trap has been called"
+        , "apply_trap_called": "[Apply Trap Called] The watcher apply trap has been called"
+        , "construct_trap_called": "[Construct Trap Called] The watcher construct trap has been called"
+    }
+}
