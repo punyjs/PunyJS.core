@@ -9,6 +9,9 @@ function _EventEmitter(
     , is_array
     , utils_copy
     , utils_clear
+    , utils_uuid
+    , reporter
+    , infos
 ) {
 
     return EventEmitter;
@@ -20,31 +23,42 @@ function _EventEmitter(
         if (!is_object(listeners)) {
             listeners = {};
         }
+        var emitterId = utils_uuid(
+            {"version":4}
+        );
         /**
         * @prototype
         */
         return Object.create(
             prototype
             , {
-                "on": {
+                "emitterId": {
+                    "enumerable": false
+                    , "value": emitterId
+                }
+                , "listeners": {
+                    "enumerable": false
+                    , "value": listeners
+                }
+                , "on": {
                     "enumerable": true
-                    , "value": addListeners.bind(null, listeners)
+                    , "value": addListeners.bind(null, emitterId, listeners)
                 }
                 , "once": {
                     "enumerable": true
-                    , "value": once.bind(null, listeners)
+                    , "value": once.bind(null, emitterId, listeners)
                 }
                 , "off": {
                     "enumerable": true
-                    , "value": removeListener.bind(null, listeners)
+                    , "value": removeListener.bind(null, emitterId, listeners)
                 }
                 , "hasEventListener": {
                     "enumerable": true
-                    , "value": hasEventListener.bind(null, listeners)
+                    , "value": hasEventListener.bind(null, emitterId, listeners)
                 }
                 , "emit": {
                     "enumerable": true
-                    , "value": fireEvent.bind(null, listeners)
+                    , "value": fireEvent.bind(null, emitterId, listeners)
                 }
             }
         );
@@ -52,13 +66,14 @@ function _EventEmitter(
     /**
     * @function
     */
-    function once(listeners, eventName, callback, options) {
+    function once(emitterId, listeners, eventName, callback, options) {
         if (!is_object(options)) {
             options = {};
         }
         options.once = true;
         addListener(
-            listeners
+            emitterId
+            , listeners
             , eventName
             , callback
             , options
@@ -67,11 +82,12 @@ function _EventEmitter(
     /**
     * @function
     */
-    function addListeners(eventNames) {
+    function addListeners(emitterId, listeners, eventNames, callback, options) {
         //if this is a single event name then process it
-        if (is_array(eventNames)) {
+        if (!is_array(eventNames)) {
             addListener(
-                listeners
+                emitterId
+                , listeners
                 , eventNames
                 , callback
                 , options
@@ -81,7 +97,8 @@ function _EventEmitter(
         else {
             for(let i = 0, l = eventNames.length; i < l; i++) {
                 addListener(
-                    listeners
+                    emitterId
+                    , listeners
                     , eventNames[i]
                     , callback
                     , options
@@ -92,21 +109,28 @@ function _EventEmitter(
     /**
     * @function
     */
-    function addListener(listeners, eventName, callback, options) {
+    function addListener(emitterId, listeners, eventName, callback, options) {
         if (!listeners.hasOwnProperty(eventName)) {
             listeners[eventName] = [];
         }
+        options = options || {};
         listeners[eventName].push(
             {
                 "callback": callback
                 , "options": options
             }
         );
+        reporter.event(
+            `${infos.event.listener_added} (${eventName}:${emitterId}, once:${!!options.once})`
+        );
+        reporter.extended(
+            `add listener - ${eventName}:${emitterId},[${Object.keys(listeners)}]`
+        );
     }
     /**
     * @function
     */
-    function removeListener(listeners, eventName, callback) {
+    function removeListener(emitterId, listeners, eventName, callback) {
         //clear all of the listeners if there is no event name
         if (!eventName) {
             utils_clear(listeners);
@@ -123,8 +147,12 @@ function _EventEmitter(
                 , eventName
                 , callback
             );
+            //see if the listener was found
             if (index !== -1) {
                 delete listeners[eventName][index];
+            }
+            else {
+                return false;
             }
             //if the listeners collection is empty we can destroy the container
             if (listeners[eventName].length === 0) {
@@ -136,12 +164,16 @@ function _EventEmitter(
             delete listeners[eventName];
         }
 
+        reporter.event(
+            `${infos.event.listener_removed} (${eventName}:${emitterId}, callback:${!!callback})`
+        );
+
         return true;
     }
     /**
     * @function
     */
-    function hasEventListener(listeners, eventName) {
+    function hasEventListener(emitterId, listeners, eventName) {
         if (!listeners.hasOwnProperty(eventName)) {
             return false;
         }
@@ -159,16 +191,25 @@ function _EventEmitter(
     /**
     * @function
     */
-    function fireEvent(listeners, eventName, details) {
+    function fireEvent(emitterId, listeners, eventName, details) {
         var eventListeners = listeners[eventName]
         , runOnceIndexes = []
         ;
+        reporter.extended(
+            `fire event - ${eventName}:${emitterId},[${!!listeners && Object.keys(listeners)}]`
+        );
         if (is_nill(eventListeners) || eventListeners.length === 0) {
             return false;
         }
         //loop through the listeners
         eventListeners.forEach(
-            executeCallback.bind(null, runOnceIndexes, details)
+            executeCallback.bind(
+                null
+                , emitterId
+                , eventName
+                , runOnceIndexes
+                , details
+            )
         );
         //remove any run once entries
         runOnceIndexes.forEach(
@@ -182,7 +223,7 @@ function _EventEmitter(
     /**
     * @function
     */
-    function executeCallback(runOnceIndexes, details, listener, index) {
+    function executeCallback(emitterId, eventName, runOnceIndexes, details, listener, index) {
         var options = listener.options
         , runAsync = details.runAsync === true
             ? true
@@ -207,6 +248,10 @@ function _EventEmitter(
         if (!!options && options.once === true) {
             runOnceIndexes.push(index);
         }
+
+        reporter.event(
+            `${infos.event.event_emitted} (${eventName}:${emitterId},async:${runAsync})`
+        );
     }
     /**
     * @function
