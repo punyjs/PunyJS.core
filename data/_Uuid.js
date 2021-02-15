@@ -46,12 +46,14 @@ function _Uuid(
             uuidInt8Array
         );
 
-        if (options.format.indexOf("id") !== -1) {
-            return uuidHexArray.unshift("x");
-        }
+        if (!!options.format) {
+            if (options.format.indexOf("id") !== -1) {
+                return uuidHexArray.unshift("x");
+            }
 
-        if (options.format.indexOf("clean") !== -1) {
-            return uuidHexArray.join("");
+            if (options.format.indexOf("clean") !== -1) {
+                return uuidHexArray.join("");
+            }
         }
 
         return uuidHexArray.join("-");
