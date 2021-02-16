@@ -3,11 +3,9 @@
 * @factory
 *   @singleton
 *   @dependency {function} node_process ["+process"]
-*   @dependency {funciton} performance ["+performance"]
 */
 function _Timestamper(
-    node_process
-    , performance
+    performance
 ) {
     /**
     * The
@@ -28,11 +26,6 @@ function _Timestamper(
         origin = performance.timeOrigin;
         worker = browserNow;
     }
-    //node
-    else if (!!node_process) {
-        origin = Date.now();
-        worker = nodeNow;
-    }
     //fallback
     else {
         worker = fallbackNow;
@@ -50,13 +43,6 @@ function _Timestamper(
     */
     function browserNow() {
         return performance.now() + origin;
-    }
-    /**
-    * Returns the number of milliseconds since origin, using the node process uptime, adding the origin and converting it to miliseconds
-    * @function
-    */
-    function nodeNow() {
-        return node_process.uptime() * 1e-3 + origin;
     }
     /**
     * Fallback, low precision milliseconds since 01/01/1970.
