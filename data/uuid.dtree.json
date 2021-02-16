@@ -1,5 +1,6 @@
 {
-    "is": [{
+    "performance": ["+performance"]
+    , "is": [{
         "nill": [":PunyJS.core.is.Nill"]
         , "object": [":PunyJS.core.is.Object"]
         , "bool": [":PunyJS.core.is.Bool"]
