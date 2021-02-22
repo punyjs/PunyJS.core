@@ -1,6 +1,5 @@
 {
-    "performance": ["+performance"]
-    , "is": [{
+    "is": [{
         "nill": [":PunyJS.core.is.Nill"]
         , "object": [":PunyJS.core.is.Object"]
         , "bool": [":PunyJS.core.is.Bool"]
@@ -21,5 +20,8 @@
     , "security": [{
         "crypto": [":PunyJS.core.security._Crypto", []]
         , "fillRandomBytesSync": [".security.crypto",".fillRandomBytesSync"]
+    }]
+    , "utils": [{
+        "uuid": [":PunyJS.core.data._Uuid",[]]
     }]
 }
