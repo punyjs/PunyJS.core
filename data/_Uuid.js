@@ -49,7 +49,7 @@ function _Uuid(
         if (!!options.format) {
             //Add an x to ensure the uuid does not start with a number
             if (options.format.indexOf("id") !== -1) {
-                uuidHexArray = uuidHexArray.unshift("x");
+                uuidHexArray.unshift("x");
             }
             //return the uuid without the dashes
             if (options.format.indexOf("clean") !== -1) {
