@@ -660,3 +660,65 @@ function createWatcherTest9(
         }
     );
 }
+/**
+* @test
+*   @title PunyJS.core.object._CreateWatcher: namespace with escaped dot
+*/
+function createWatcherTest10(
+    controller
+    , mock_callback
+) {
+    var eventEmitter, createWatcher, events, target, watched, watched, cb;
+
+    arrange(
+        async function arrange() {
+            eventEmitter = await controller(
+                [":PunyJS.core.event._EventEmitter", []]
+            );
+            target = {
+                "${state.val}": "value1"
+                , "sub": {
+                    "${state.val2}prop": "value2"
+                }
+            }
+            , events = eventEmitter()
+            ;
+            cb = mock_callback();
+            createWatcher = await controller(
+                [":PunyJS.core.proxy._CreateWatcher", []]
+            );
+        }
+    );
+
+    act(
+        function act() {
+            watched = createWatcher(
+                target
+                , events
+            );
+            watched.on("${state\\.val}", cb);
+            watched.on("sub.${state\\.val2}prop", cb);
+            watched.sub["${state\\.val2}prop"] = "update2";
+            watched["${state\\.val}"] = "update1";
+        }
+    );
+
+    assert(
+        function assert(test) {
+            test("The first callback sould be called with")
+            .value(cb)
+            .getCallbackArg(0, 0)
+            .stringify()
+            .equals('{"action":"set","key":"sub.${state\\\\.val2}prop","value":"update2","miss":true}')
+            ;
+
+            test("The second callback sould be called with")
+            .value(cb)
+            .getCallbackArg(1, 0)
+            .stringify()
+            .equals('{"action":"set","key":"${state\\\\.val}","value":"update1","miss":true}')
+            ;
+
+        }
+    );
+}

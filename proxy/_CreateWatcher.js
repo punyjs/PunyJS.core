@@ -27,6 +27,11 @@ function _CreateWatcher(
         "apply": applyTrap
         , "construct": constructTrap
     }
+    /**
+    * A regular expression pattern for replacing dots with escaped dots
+    * @property
+    */
+    , DOT_PATT = /(?:(?<![\\])|(?<=[\\]{2}))[.]/g
     ;
 
     //add the type check
@@ -440,6 +445,12 @@ function _CreateWatcher(
         if (is_symbol(propName)) {
             propName = propName.toString();
         }
+        //if there are dots in the propname then escape them
+        propName = `${propName}`.replace(
+            DOT_PATT
+            , "\\."
+        );
+        //return the key
         return !!parentName
             ? `${parentName}.${propName}`
             : propName
