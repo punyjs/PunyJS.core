@@ -33,6 +33,7 @@ function Ensure(jpath, data) {
             //if this is the last part then make it `null`
             if (indx === lastIndx) {
                 scope[part] = null;
+                return;
             }
             //otherwise make it an object
             else {
@@ -44,4 +45,9 @@ function Ensure(jpath, data) {
 
         return true;
     });
+
+    return {
+        "parent": scope
+        , "index": pathParts[lastIndx]
+    };
 }
