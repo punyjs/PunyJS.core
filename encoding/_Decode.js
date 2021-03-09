@@ -21,8 +21,8 @@ function _Decode(
                     ;
                 }
                 else {
-                    return browser_btoa(
-                        val
+                    return browser_atob(
+                        data
                     );
                 }
             }
