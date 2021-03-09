@@ -343,6 +343,25 @@ function _Reporter(
                 );
             }
         }
+        /**
+        * A method to report messages with `http` category
+        * @method
+        *   @extends report
+        *   @argument {string} category "state"
+        */
+        , "http": {
+            "enumerable": true
+            , "value": function error(message, details, timestamp) {
+                //generate a timestamp if not provided
+                timestamp = timestamp || timestamper();
+                self.report(
+                    "http"
+                    , message
+                    , details
+                    , timestamp
+                );
+            }
+        }
     });
 
     /**
