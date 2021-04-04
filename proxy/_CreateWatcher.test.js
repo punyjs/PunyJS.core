@@ -134,14 +134,14 @@ function createWatcherTest2(
             .value(cb)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"set","key":"property1","value":"update1","oldValue":"value1","miss":false}')
+            .equals('{"action":"set","name":"property1","key":"property1","value":"update1","oldValue":"value1","miss":false}')
             ;
 
             test("The second call to callback should be")
             .value(cb)
             .getCallbackArg(1, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub.property2","value":"update2","oldValue":"value2","miss":false}')
+            .equals('{"action":"set","name":"property2","parentKey":"sub","key":"sub.property2","value":"update2","oldValue":"value2","miss":false}')
             ;
         }
     );
@@ -210,14 +210,14 @@ function createWatcherTest3(
             .value(cb)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"delete","key":"property1","oldValue":"value1","miss":false}')
+            .equals('{"action":"delete","name":"property1","key":"property1","oldValue":"value1","miss":false}')
             ;
 
             test("The second call to callback should be")
             .value(cb)
             .getCallbackArg(1, 0)
             .stringify()
-            .equals('{"action":"delete","key":"sub.property2","oldValue":"value2","miss":false}')
+            .equals('{"action":"delete","name":"property2","parentKey":"sub","key":"sub.property2","oldValue":"value2","miss":false}')
             ;
         }
     );
@@ -282,7 +282,7 @@ function createWatcherTest4(
             .value(cb)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"apply","key":"property1","scope":{"scope":"this"},"args":["arg1","arg2"]}')
+            .equals('{"action":"apply","name":"property1","key":"property1","scope":{"scope":"this"},"args":["arg1","arg2"]}')
             ;
         }
     );
@@ -349,7 +349,7 @@ function createWatcherTest5(
             .value(cb)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"construct","key":"property1","args":["arg1","arg2"]}')
+            .equals('{"action":"construct","name":"property1","key":"property1","args":["arg1","arg2"]}')
             ;
         }
     );
@@ -456,7 +456,7 @@ function createWatcherTest7(
             .hasBeenCalled(1)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub1.sub2.prop3","value":"update3","oldValue":"value3","miss":false}')
+            .equals('{"action":"set","name":"prop3","parentKey":"sub1.sub2","key":"sub1.sub2.prop3","value":"update3","oldValue":"value3","miss":false}')
             ;
 
             test("callback 2 should be first called with")
@@ -464,19 +464,19 @@ function createWatcherTest7(
             .hasBeenCalled(3)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"set","key":"prop1","value":"updated1","oldValue":"value1","miss":false}');
+            .equals('{"action":"set","name":"prop1","key":"prop1","value":"updated1","oldValue":"value1","miss":false}');
 
             test("callback 2 should be second called with")
             .value(cb2)
             .getCallbackArg(1, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub1.sub2.prop3","value":"update3","oldValue":"value3","miss":false}');
+            .equals('{"action":"set","name":"prop3","parentKey":"sub1.sub2","key":"sub1.sub2.prop3","value":"update3","oldValue":"value3","miss":false}');
 
             test("callback 2 should be third called with")
             .value(cb2)
             .getCallbackArg(2, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub1.prop4","value":"update4","miss":true}');
+            .equals('{"action":"set","name":"prop4","parentKey":"sub1","key":"sub1.prop4","value":"update4","miss":true}');
         }
     );
 }
@@ -533,7 +533,7 @@ function createWatcherTest8(
             .hasBeenCalled(1)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub1.sub2.prop3","value":"update3","oldValue":"value3","miss":false}')
+            .equals('{"action":"set","name":"prop3","parentKey":"sub1.sub2","key":"sub1.sub2.prop3","value":"update3","oldValue":"value3","miss":false}')
             ;
         }
     );
@@ -614,42 +614,42 @@ function createWatcherTest9(
             .value(cb1)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub1.3","value":"new member","arrayAction":"append","miss":true}')
+            .equals('{"action":"set","name":"3","parentKey":"sub1","key":"sub1.3","value":"new member","arrayAction":"append","miss":true}')
             ;
 
             test("The 2nd callback should be called with")
             .value(cb1)
             .getCallbackArg(1, 0)
             .stringify()
-            .equals('{"action":"delete","key":"sub1.0","oldValue":{"member1":"value1"},"arrayAction":"delete","miss":false}')
+            .equals('{"action":"delete","name":"0","parentKey":"sub1","key":"sub1.0","oldValue":{"member1":"value1"},"arrayAction":"delete","miss":false}')
             ;
 
             test("The 3rd callback should be called with")
             .value(cb1)
             .getCallbackArg(2, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub1.1","value":"inserted member","oldValue":["member3",{"prop3":"value3"}],"arrayAction":"insert","miss":false}')
+            .equals('{"action":"set","name":"1","parentKey":"sub1","key":"sub1.1","value":"inserted member","oldValue":["member3",{"prop3":"value3"}],"arrayAction":"insert","miss":false}')
             ;
 
             test("The 4th callback should be called with")
             .value(cb1)
             .getCallbackArg(3, 0)
             .stringify()
-            .equals('{"action":"delete","key":"sub1.3","oldValue":"new member","arrayAction":"delete","miss":false}')
+            .equals('{"action":"delete","name":3,"parentKey":"sub1","key":"sub1.3","oldValue":"new member","arrayAction":"delete","miss":false}')
             ;
 
             test("The 5th callback should be called with")
             .value(cb1)
             .getCallbackArg(4, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub1.0","value":null,"oldValue":"member2","arrayAction":"replace","miss":false}')
+            .equals('{"action":"set","name":"0","parentKey":"sub1","key":"sub1.0","value":null,"oldValue":"member2","arrayAction":"replace","miss":false}')
             ;
 
             test("The 6th callback should be called with")
             .value(cb1)
             .getCallbackArg(5, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub1.2","value":"replaced member","oldValue":["member3",{"prop3":"value3"}],"arrayAction":"replace","miss":false}')
+            .equals('{"action":"set","name":"2","parentKey":"sub1","key":"sub1.2","value":"replaced member","oldValue":["member3",{"prop3":"value3"}],"arrayAction":"replace","miss":false}')
             ;
 
             test("The target should be")
@@ -709,16 +709,108 @@ function createWatcherTest10(
             .value(cb)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"set","key":"sub.${state\\\\.val2}prop","value":"update2","miss":true}')
+            .equals('{"action":"set","name":"${state\\\\.val2}prop","parentKey":"sub","key":"sub.${state\\\\.val2}prop","value":"update2","miss":true}')
             ;
 
             test("The second callback sould be called with")
             .value(cb)
             .getCallbackArg(1, 0)
             .stringify()
-            .equals('{"action":"set","key":"${state\\\\.val}","value":"update1","miss":true}')
+            .equals('{"action":"set","name":"${state\\\\.val}","key":"${state\\\\.val}","value":"update1","miss":true}')
             ;
 
+        }
+    );
+}
+/**
+* @test
+*   @title PunyJS.core.object._CreateWatcher: symbolic links
+*/
+function createWatcherTest11(
+    controller
+    , mock_callback
+) {
+    var eventEmitter, createWatcher, events, target, watched, watched, cb1, cb2;
+
+    arrange(
+        async function arrange() {
+            eventEmitter = await controller(
+                [":PunyJS.core.event._EventEmitter", []]
+            );
+            target = {
+                "list": [
+                    {
+                        "name": "item1"
+                    }
+                    , {
+                        "name": "item2"
+                    }
+                ]
+                , "currentItem": null
+            }
+            , events = eventEmitter()
+            ;
+            cb1 = mock_callback();
+            cb2 = mock_callback();
+            createWatcher = await controller(
+                [":PunyJS.core.proxy._CreateWatcher", []]
+            );
+        }
+    );
+
+    act(
+        function act() {
+            watched = createWatcher(
+                target
+                , events
+            );
+            watched.on(
+                "list.*"
+                , cb1
+            );
+            watched.on(
+                "currentItem.name"
+                , cb2
+            );
+            watched.currentItem = watched.list[0];
+            watched.currentItem.name = "update";
+
+            watched.currentItem = watched.list[1];
+            watched.currentItem.name = "update2";
+        }
+    );
+
+    assert(
+        function assert(test) {
+            test("cb1 should be called with")
+            .value(cb1)
+            .hasBeenCalled(2)
+            .getCallbackArg(0, 0)
+            .stringify()
+            .equals('{"action":"set","name":"name","parentKey":"list.0","key":"list.0.name","value":"update","oldValue":"item1","miss":false}')
+            ;
+
+            test("cb2 should be called with")
+            .value(cb2)
+            .hasBeenCalled(2)
+            .getCallbackArg(0, 0)
+            .stringify()
+            .equals('{"action":"set","name":"name","parentKey":"currentItem","key":"currentItem.name","value":"update","oldValue":"item1","miss":false}')
+            ;
+
+            test("cb1 should be called with")
+            .value(cb1)
+            .getCallbackArg(1, 0)
+            .stringify()
+            .equals('{"action":"set","name":"name","parentKey":"list.1","key":"list.1.name","value":"update2","oldValue":"item2","miss":false}')
+            ;
+
+            test("cb2 should be called with")
+            .value(cb2)
+            .getCallbackArg(1, 0)
+            .stringify()
+            .equals('{"action":"set","name":"name","parentKey":"currentItem","key":"currentItem.name","value":"update2","oldValue":"item2","miss":false}')
+            ;
         }
     );
 }

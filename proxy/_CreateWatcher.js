@@ -170,32 +170,14 @@ function _CreateWatcher(
             //store the function name for subsequent processing
             options.arrayOpMap.set(target, propName);
         }
-        //if the value is an object or function
-        if (is_objectValue(value) || is_func(value)) {
-            //if the value is already a proxy then return it
-            if (value.$$isWatched$$ === true) {
-                return value;
-            }
-            //otherwise create a proxy but only for owned properties, to leave the prototype stuff alone
-            if (target.hasOwnProperty(propName)) {
-                valueProxy = options.proxyMap.get(value);
-                if (!valueProxy) {
-                    valueProxy = createProxy(
-                        value
-                        , options
-                        , events
-                        , fullKey
-                    );
-                    options.proxyMap.set(
-                        value
-                        , valueProxy
-                    );
-                }
-                return valueProxy;
-            }
-        }
-        //all others
-        return value;
+
+        return getReturnValue(
+            options
+            , events
+            , parentName
+            , target
+            , propName
+        );
     }
     /**
     * Handles property assignment, but throws an error if the property is an event function
@@ -264,8 +246,16 @@ function _CreateWatcher(
             if (includeDetails) {
                 details = {
                     "action": "set"
+                    , "name": propName
+                    , "parentKey": parentName
                     , "key": fullKey
-                    , "value": value
+                    , "value": getReturnValue(
+                        options
+                        , events
+                        , parentName
+                        , target
+                        , propName
+                    )
                     , "oldValue": oldValue
                     , "miss": !hasProp
                 };
@@ -314,9 +304,11 @@ function _CreateWatcher(
         var includeDetails = options.includeDetails.indexOf("delete") !== -1
         //  and if we are get the value before it's deleted
         , value = target[propName]
-        //delete the property
-        , deleted = delete target[propName]
-        , fullKey = getFullKey(parentName, propName)
+        , deleted
+        , fullKey = getFullKey(
+            parentName
+            , propName
+        )
         , details
         ;
         ///LOGGING
@@ -330,12 +322,16 @@ function _CreateWatcher(
                 options.proxyMap.delete(value);
             }
         }
+        //delete the property
+        deleted = delete target[propName];
         //if this is part of the traps list
         if (options.traps.indexOf("delete") !== -1) {
             //see if we are including details
             if (includeDetails) {
                 details = {
                     "action": "delete"
+                    , "name": propName
+                    , "parentKey": parentName
                     , "key": fullKey
                     , "oldValue": value
                     , "miss": !deleted
@@ -366,6 +362,9 @@ function _CreateWatcher(
         //see if we are including event details
         var includeDetails = options.includeDetails.indexOf("apply") !== -1
         , fullKey = parentName
+        , [parentKey, propName] = getParentChildKeys(
+            fullKey
+        )
         , details
         ;
         ///LOGGING
@@ -379,6 +378,8 @@ function _CreateWatcher(
             if (includeDetails) {
                 details = {
                     "action": "apply"
+                    , "name": propName
+                    , "parentKey": parentKey
                     , "key": fullKey
                     , "scope": thisArg
                     , "args": args
@@ -405,6 +406,7 @@ function _CreateWatcher(
         //see if we are including event details
         var includeDetails = options.includeDetails.indexOf("construct") !== -1
         , fullKey = parentName
+        , name
         , details
         ;
         ///LOGGING
@@ -414,10 +416,15 @@ function _CreateWatcher(
         ///END LOGGING
         //if this is part of the traps list
         if (options.traps.indexOf("construct") !== -1) {
+            [parentName, name] = getParentChildKeys(
+                fullKey
+            );
             //see if we are including details
             if (includeDetails) {
                 details = {
                     "action": "construct"
+                    , "name": name
+                    , "parentKey": parentName
                     , "key": fullKey
                     , "args": args
                 };
@@ -436,26 +443,6 @@ function _CreateWatcher(
         );
     }
 
-    /**
-    * Appends the parent name to the prop name if exists
-    * @function
-    */
-    function getFullKey(parentName, propName) {
-        //what to do with symbols
-        if (is_symbol(propName)) {
-            propName = propName.toString();
-        }
-        //if there are dots in the propname then escape them
-        propName = `${propName}`.replace(
-            DOT_PATT
-            , "\\."
-        );
-        //return the key
-        return !!parentName
-            ? `${parentName}.${propName}`
-            : propName
-        ;
-    }
     /**
     * @function
     */
@@ -627,6 +614,8 @@ function _CreateWatcher(
                 if (includeDetails) {
                     details = {
                         "action": "delete"
+                        , "name": oldLength
+                        , "parentKey": parentName
                         , "key": fullKey
                         , "oldValue": target[oldLength]
                         , "arrayAction": "delete"
@@ -714,6 +703,8 @@ function _CreateWatcher(
         , oldValue
         , value
         , fullKey
+        , propName
+        , parentKey
         , action
         , miss
         , arrayAction
@@ -755,10 +746,23 @@ function _CreateWatcher(
 
         //see if we are including details
         if (includeDetails) {
+            [parentKey, propName] = getParentChildKeys(
+                fullKey
+            );
             details = {
                 "action": action
+                , "name": propName
+                , "parentKey": parentKey
                 , "key": fullKey
-                , "value": value
+                , "value": action === "delete"
+                    ? undefined
+                    : getReturnValue(
+                        options
+                        , events
+                        , parentName
+                        , target
+                        , propName
+                    )
                 , "oldValue": oldValue
                 , "arrayAction": arrayAction
                 , "miss": miss
@@ -781,5 +785,73 @@ function _CreateWatcher(
             return value.$$isWatched$$ === true;
         }
         return false;
+    }
+
+    /**
+    * Appends the parent name to the prop name if exists
+    * @function
+    */
+    function getFullKey(parentName, propName) {
+        //what to do with symbols
+        if (is_symbol(propName)) {
+            propName = propName.toString();
+        }
+        //if there are dots in the propname then escape them
+        propName = `${propName}`.replace(
+            DOT_PATT
+            , "\\."
+        );
+        //return the key
+        return !!parentName
+            ? `${parentName}.${propName}`
+            : propName
+        ;
+    }
+    /**
+    * @function
+    */
+    function getParentChildKeys(fullKey) {
+        var parts = fullKey
+            .split(DOT_PATT)
+        , childKey = parts.pop()
+        , parentKey = parts.join(".")
+        ;
+
+        return [
+            parentKey || undefined
+            , childKey
+        ];
+    }
+    /**
+    * @function
+    */
+    function getReturnValue(options, events, parentName, target, propName) {
+        var value = target[propName]
+        , valueProxy;
+        //if the value is an object or function
+        if (is_objectValue(value) || is_func(value)) {
+            //otherwise create a proxy but only for owned properties, to leave the prototype stuff alone
+            if (target.hasOwnProperty(propName)) {
+                valueProxy = options.proxyMap.get(value);
+                if (!valueProxy) {
+                    valueProxy = createProxy(
+                        value
+                        , options
+                        , events
+                        , getFullKey(
+                            parentName
+                            , propName
+                        )
+                    );
+                    options.proxyMap.set(
+                        value
+                        , valueProxy
+                    );
+                }
+                return valueProxy;
+            }
+        }
+        //all others
+        return value;
     }
 }
