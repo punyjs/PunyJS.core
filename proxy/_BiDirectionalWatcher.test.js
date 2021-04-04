@@ -112,7 +112,7 @@ function biDirectionalWatcherTest2(
             .hasBeenCalled(1)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"set","key":"newprop","value":"new value 2","oldValue":"new value 1","miss":false}')
+            .equals('{"action":"set","name":"newprop","key":"newprop","value":"new value 2","oldValue":"new value 1","miss":false}')
             ;
 
             test("callbackZ should be called")
@@ -120,7 +120,7 @@ function biDirectionalWatcherTest2(
             .hasBeenCalled(1)
             .getCallbackArg(0, 0)
             .stringify()
-            .equals('{"action":"set","key":"newprop","value":"new value 1","miss":true}')
+            .equals('{"action":"set","name":"newprop","key":"newprop","value":"new value 1","miss":true}')
             ;
         }
     );
