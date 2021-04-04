@@ -3,7 +3,7 @@
 * @function
 */
 function Lookup(jpath, data) {
-    var SPLIT_PATH = /[.]/g
+    var SPLIT_PATH = /(?:(?<![\\])|(?<=[\\]{2}))[.]/g
     , INDXR_PATT = /[\[\]]/g
     , NUM_PATT = /^[0-9]+$/
     ;
@@ -14,21 +14,23 @@ function Lookup(jpath, data) {
     , scope = data;
 
     //loop through the parts of the path
-    pathSplit.every(function everyPart(part) {
-        //the scope should be an object
-        if (typeof scope !== "object") {
-            scope = undefined;
-            return false;
-        }
-        //if the scope is an array, let's use the part as a number
-        if (Array.isArray(scope) && NUM_PATT.test(part)) {
-            part = parseInt(part);
-        }
-        //set the scope
-        scope = scope[part];
+    pathSplit.every(
+        function everyPart(part) {
+            //the scope should be an object
+            if (typeof scope !== "object") {
+                scope = undefined;
+                return false;
+            }
+            //if the scope is an array, let's use the part as a number
+            if (Array.isArray(scope) && NUM_PATT.test(part)) {
+                part = parseInt(part);
+            }
+            //set the scope
+            scope = scope[part];
 
-        return true;
-    });
+            return true;
+        }
+    );
 
     return scope;
 }
