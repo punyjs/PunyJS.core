@@ -10,7 +10,14 @@ function clear(o) {
     Object.keys(o)
     .forEach(
         function clearKey(key) {
-            delete o[key];
+            if (typeof o[key] === "object") {
+                clear(
+                    o[key]
+                );
+            }
+            else {
+                delete o[key];
+            }
         }
     );
 }
